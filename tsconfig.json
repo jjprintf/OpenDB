@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "ES2022",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "strict": true,
+    "allowJs": true,
+    "baseUrl": "./src",
+    "declaration": true,   
+    "sourceMap": true,
+    "declarationDir": "./typings",
+    "typeRoots": [
+      "node_modules/@types",
+      "bcryptjs",
+      "bson"
+    ],
+    "types": ["node"]
+  },
+  "exclude": ["doc", "node_modules", "out"],
+  "include": ["src/**/*"],
+  "lib": ["es2022"]
+}

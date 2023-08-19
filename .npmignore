@@ -1,0 +1,14 @@
+# Directories
+src/
+doc/
+OpenDB/
+
+# Files
+.eslintrc
+.eslintignore
+.gitignore
+tsconfig.json
+jsdoc.json
+jsdoc.sh
+git.sh
+README.md

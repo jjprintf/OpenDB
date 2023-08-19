@@ -1,0 +1,57 @@
+{
+  "name": "open.db",
+  "version": "2.4.2",
+  "description": "Fast efficient database, uses BSON",
+  "main": "dist/index.js",
+  "types": "./typings/index.d.ts",
+  "scripts": {
+    "lint": "eslint . --ext .ts \"./src/\" ",
+    "format": "eslint . --fix --ext .ts \"./src/\" ",
+    "ts": "ts-node",
+    "make": "tsc --project \"./\" ",
+    "dev": "nodemon ./src/tests/index.ts",
+    "docs":  "jsdoc -c jsdoc.json"
+  },
+  "author": "PrintfDead",
+  "license": "GNU GPL3",
+  "keywords": [
+    "javascript",
+    "database",
+    "bson",
+    "efficient",
+    "nodejs"
+  ],
+  "repository": "git+https://github.com/PrintfDead/OpenDB.git",
+  "bugs": {
+    "url": "https://github.com/PrintfDead/OpenDB/issues"
+  },
+  "homepage": "https://github.com/PrintfDead/OpenDB#readme",
+  "files": [
+    "./dist/",
+    "./typings/"
+  ],
+  "engine": {
+    "node": ">=16.*"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/crypto-js": "^4.1.1",
+    "@types/node": "^20.5.0",
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.57.1",
+    "clean-jsdoc-theme": "^4.1.8",
+    "eslint": "^8.23.1",
+    "jsdoc-ts-utils": "^4.0.0",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "@types/bson": "^4.2.0",
+    "bcryptjs": "^2.4.3",
+    "bson": "^5.4.0",
+    "colors": "^1.4.0",
+    "crypto-js": "^4.1.1",
+    "uid": "^2.0.2"
+  }
+}

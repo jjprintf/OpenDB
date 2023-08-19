@@ -1,0 +1,12 @@
+# Directories
+.idea/
+.vs/
+node_modules/
+OpenDB/
+dist/
+
+# Files
+git.sh
+
+# Extensions
+*.log
