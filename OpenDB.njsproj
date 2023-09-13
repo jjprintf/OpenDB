@@ -80,6 +80,7 @@
     <Content Include="docs\styles\jsdoc-default.css" />
     <Content Include="docs\styles\prettify-jsdoc.css" />
     <Content Include="docs\styles\prettify-tomorrow.css" />
+    <Content Include="jest.config.js" />
     <Content Include="jsdoc.json" />
     <Content Include="license" />
     <Content Include="package.json" />
@@ -106,7 +107,7 @@
     <TypeScriptCompile Include="src\index.ts" />
     <TypeScriptCompile Include="src\structures\BaseClient.ts" />
     <TypeScriptCompile Include="src\structures\Client.ts" />
-    <TypeScriptCompile Include="src\tests\index.ts" />
+    <TypeScriptCompile Include="src\tests\index.test.ts" />
     <TypeScriptCompile Include="src\types\Encrypt.ts" />
     <TypeScriptCompile Include="typings\index.d.ts" />
     <TypeScriptCompile Include="typings\structures\BaseClient.d.ts" />

@@ -20,8 +20,8 @@
 
         "theme_opts": {
             "default_theme": "dark",
-            "base_url": "https://printfdead.github.io/ajaxdb",
-            "homepageTitle": "AjaxDB"
+            "base_url": "https://printfdead.github.io/opendb",
+            "homepageTitle": "OpenDB"
         }
     },
 
