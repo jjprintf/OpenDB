@@ -7,6 +7,10 @@ import { EventEmitter } from 'node:events';
  * @type {ejson} EJSON
  */
 type ejson = typeof EJSON;
+type Encrypt = {
+    key_encrypt: lib.CipherParams;
+    secret_key: string;
+};
 type ErrorClient = string | number | object | undefined;
 export interface BaseClient {
     ejson: ejson;
@@ -33,10 +37,7 @@ export declare class BaseClient extends EventEmitter {
      * @param {number} Salt - Number of salts
      * @returns {Encrypt}
      */
-    Encrypt<T extends EncryptsTypes>(Content: T, Salt: number | 10): {
-        key_encrypt: lib.CipherParams;
-        secret_key: string;
-    };
+    Encrypt<T extends EncryptsTypes>(Content: T, Salt: number | 10): Encrypt;
     /**
      * @typedef {Object} DecryptedOptions
      * @property {CipherParams} EncryptKey - Encrypted key string generate by encrypt method
@@ -46,7 +47,7 @@ export declare class BaseClient extends EventEmitter {
      * @public
      * @description Decrypted string
      * @param {DecryptOptions} Options - Content to be decrypted
-     * @returns {object}
+     * @returns {string}
      */
     Decrypt(Options: DecryptOptions): string;
 }

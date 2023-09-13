@@ -1,8 +1,5 @@
 # @OpenDB
 
-# **IMPORTANT! The package is a pre-release, it's not finished, it shouldn't be used yet.**
-
-
 > Documentation: [OpenDB Docs](https://printfdead.github.io/ajaxdb/index.html)
 
 # Information:
@@ -16,9 +13,8 @@ npm i open.db --save
 ```
 
 # Important Notes:
-> BSON Error: **bson size must be >= 5, is 0** This is solved by deleting the OpenDB folder and restarting the app, it is because the containers and pointers were not saved correctly.
-
-> Errors: The errors and/or warnings shown in this documentation are errors/warns that can occur when running OpenDB, they are only informative, a solution can be reached by reading the description of each error/warn.
+- BSON Error: **bson size must be >= 5, is 0** This is solved by deleting the OpenDB folder and restarting the app, it is because the containers and pointers were not saved correctly.
+- Errors: The errors and/or warnings shown in this documentation are errors/warns that can occur when running OpenDB, they are only informative, a solution can be reached by reading the description of each error/warn.
 
 # Examples:
 - `Create Database & Start Client Instance:`
@@ -65,11 +61,6 @@ OpenDB.on('error', (error) => {
 
 await OpenDB.Start();
 ```
-#### Errors:
-- (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
-- (ODB-99) **An error occurred and the path was not specified.** This error can occur because the path could not be defined automatically or for other internal reasons.
-#### Warns:
-- (Warn-01) **The root folder already exists, nothing will be created and this function will be skipped.** This warn is because the root folder already exists, it will not affect the code but it will warn that it already exists, so you can delete the 'Start()' function from the code
 ---
 - `CreateDatabase`
 ```ts
@@ -81,11 +72,6 @@ await OpenDB.Start();
 
 await OpenDB.CreateDatabase("DatabaseName");
 ```
-#### Errors:
-- (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
-- (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found.
-#### Warns:
-- (Warn-02) **The database already exists.** This is because the database already exists, it will not do anything, the function will be skipped.
 ---
 - `SetDatabase`
 ```ts
@@ -99,13 +85,6 @@ await OpenDB.CreateDatabase("DatabaseName");
 
 OpenDB.SetDatabase("DatabaseName");
 ```
-#### Errors:
-- (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
-- (ODB-03) **This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.** This error is because the database is not created.
-- (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found.
-- (ODB-04) **If force is not activated, the name of the database cannot be changed.** This is because the database name is already specified, and 'Force' must be set to true to be able to change it.
-#### Warns:
-- (Warn-03) **This can cause loading times to increase significantly.** it is because 'NotLoad' is true
 ---
 - `CreatePointer`
 ```ts
@@ -117,12 +96,6 @@ OpenDB.SetDatabase("DatabaseName");
 
 await OpenDB.CreatePointer("PointerReference");
 ```
-#### Errors:
-- (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
-- (ODB-03) **This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.** This error is because the database is not created.
-- (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found.
-#### Warns:
-- (Warn-04) **A pointer with this reference already exists, the pointer will not be created.** This is because the pointer with the same reference already exists, it will not give an error, the function will be skipped.
 ---
 - `GetPointer`
 ```ts
@@ -134,10 +107,6 @@ await OpenDB.CreatePointer("PointerReference");
 
 OpenDB.GetPointer("PointerReference");
 ```
-#### Errors:
-- (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
-- (ODB-03) **This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.** This error is because the database is not created.
-- (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found.
 ---
 - `GetContainer`
 ```ts
@@ -149,10 +118,6 @@ OpenDB.GetPointer("PointerReference");
 
 OpenDB.GetContainer("ContainerID");
 ```
-#### Errors:
-- (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
-- (ODB-03) **This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.** This error is because the database is not created.
-- (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found.
 ---
 - `Push`
 ```ts
@@ -168,12 +133,6 @@ OpenDB.GetContainer("ContainerID");
 
 await OpenDB.Push<string>("This content can be object, string, number and array", "Pointer Reference", 1, "Container ID");
 ```
-#### Errors:
-- (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
-- (ODB-03) **This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.** This error is because the database is not created.
-- (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found. 
-- (ODB-05) **Pointer not found.** This error is because the pointer not found.
-- (ODB-07) **The id is already in use.** This happens when the table id is already in use.
 ---
 - `AddContainer`
 ```ts
@@ -184,14 +143,8 @@ await OpenDB.Push<string>("This content can be object, string, number and array"
  * @returns void
  */
 
-OpenDB.AddContainer("Pointer reference", "Container ID");
+await OpenDB.AddContainer("Pointer reference", "Container ID");
 ```
-#### Errors:
-- (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
-- (ODB-03) **This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.** This error is because the database is not created.
-- (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found. 
-- (ODB-05) **Pointer not found.** This error is because the pointer not found.
-- (ODB-10) **This ID is not correct.** This error is because the container id is not correct.
 ---
 - `Edit`
 ```ts
@@ -210,13 +163,35 @@ await OpenDB.Edit<string>("Pointer Reference", null, "Test1", "Test2", 1, "Conta
 ```
 ### Note:
 - **KeyName:** If your KeyName is not an object just put null.
-#### Errors:
-- (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
-- (ODB-03) **This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.** This error is because the database is not created.
-- (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found. 
-- (ODB-05) **Pointer not found.** This error is because the pointer not found.
-- (ODB-08) **Key not found.** This happens when the key was not found.
-- (ODB-10) **This ID is not correct.** This error is because the container id is not correct.
+---
+- `Find`
+```ts
+/**
+ * @param {(string|number)} Reference - Reference to find the pointer easier
+ * @param {string | number | null} KeyName - Key name to search the container
+ * @param {Push} KeyValue - Key value to search the container
+ * @param {string} Container (optional) - Container ID
+ * @description Search table by a key
+ * @returns Promise<ContainerTable | undefined>
+ */
+
+OpenDB.Find<string>("Pointer Reference", null, "Test1", "Container ID");
+```
+### Note:
+- **KeyName:** If your KeyName is not an object just put null.
+---
+- `Get`
+```ts
+/**
+ * @param {(string|number)} Reference - Reference to find the pointer easier
+ * @param {number} TableId - TableId ID
+ * @param {string} Container (optional) - Container ID
+ * @description Get table by a table id
+ * @returns Promise<ContainerTable | undefined>
+ */
+
+OpenDB.Get("Pointer Reference", 1, "Container ID");
+```
 ---
 - `DeleteTable`
 ```ts
@@ -230,13 +205,6 @@ await OpenDB.Edit<string>("Pointer Reference", null, "Test1", "Test2", 1, "Conta
 
 await OpenDB.DeleteTable("Pointer Reference", 1, "Container ID");
 ```
-#### Errors:
-- (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
-- (ODB-03) **This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.** This error is because the database is not created.
-- (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found. 
-- (ODB-05) **Pointer not found.** This error is because the pointer not found.
-- (ODB-06) **Container not found.** This error is because the container not found.
-- (ODB-08) **Key not found.** This happens when the key was not found.
 ---
 - `DeleteTableByKey`
 ```ts
@@ -253,14 +221,6 @@ await OpenDB.DeleteTableByKey<string>("Pointer Reference", null, "Test1", "Conta
 ```
 ### Note:
 - **KeyName:** If your KeyName is not an object just put null.
-#### Errors:
-- (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
-- (ODB-03) **This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.** This error is because the database is not created.
-- (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found. 
-- (ODB-05) **Pointer not found.** This error is because the pointer not found.
-- (ODB-06) **Container not found.** This error is because the container not found.
-- (ODB-08) **Key not found.** This happens when the key was not found.
-- (ODB-10) **This ID is not correct.** This error is because the container id is not correct.
 ---
 - `DeleteKey`
 ```ts
@@ -277,13 +237,6 @@ await OpenDB.DeleteKey<string>("Pointer Reference", null, "Test1", "Container ID
 ```
 ### Note:
 - **KeyName:** If your KeyName is not an object just put null.
-#### Errors:
-- (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
-- (ODB-03) **This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.** This error is because the database is not created.
-- (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found. 
-- (ODB-05) **Pointer not found.** This error is because the pointer not found.
-- (ODB-06) **Container not found.** This error is because the container not found.
-- (ODB-08) **Key not found.** This happens when the key was not found.
 ---
 - `Encrypt`
 ```ts
@@ -305,6 +258,24 @@ const encryptData = OpenDB.Encrypt<string | number>("Content"); // Salt: number 
  */
 const decryptedData = OpenDB.decrypt({ EncryptKey: encryptData.key_encrypted.toString(), SecretKey: encryptData.secret_key});
 ```
+
+## Possible Errors:
+- (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
+- (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found.
+- (ODB-03) **This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.** This error is because the database is not created.
+- (ODB-04) **If force is not activated, the name of the database cannot be changed.** This is because the database name is already specified, and 'Force' must be set to true to be able to change it.
+- (ODB-05) **Pointer not found.** This error is because the pointer not found.
+- (ODB-06) **Container not found.** This error is because the container not found.
+- (ODB-07) **The id is already in use.** This happens when the table id is already in use.
+- (ODB-08) **Key not found.** This happens when the key was not found.
+- (ODB-09) **This ID is not correct.** This error is because the container id is not correct.
+- (ODB-99) **An error occurred and the path was not specified.** This error can occured because the path could not be defined automatically or for other internal reasons.
+
+## Possible Warns:
+- (Warn-01) **The root folder already exists, nothing will be created and this function will be skipped.** This warn is because the root folder already exists, it will not affect the code but it will warn that it already exists, so you can delete the 'Start()' function from the code.
+- (Warn-02) **The database already exists.** This is because the database already exists, it will not do anything, the function will be skipped.
+- (Warn-03) **This can cause loading times to increase significantly.** it is because 'NotLoad' is true
+- (Warn-04) **A pointer with this reference already exists, the pointer will not be created.** This is because the pointer with the same reference already exists, it will not give an error, the function will be skipped.
 
 ## Development notes
 - The database is in the testing phase, report any errors.

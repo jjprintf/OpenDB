@@ -1,6 +1,6 @@
 # Directories
 src/
-doc/
+docs/
 OpenDB/
 
 # Files
@@ -8,7 +8,9 @@ OpenDB/
 .eslintignore
 .gitignore
 tsconfig.json
+jest.config.js
 jsdoc.json
 jsdoc.sh
 git.sh
-README.md
+OpenDB.sln
+OpenDB.njsproj

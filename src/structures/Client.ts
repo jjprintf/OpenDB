@@ -11,22 +11,13 @@ import { uid } from 'uid';
 
 import { BaseClient } from './BaseClient';
 
-import colors from 'colors';
-
-colors.enable();
-
 type ClientOptions = {
 	Path?: string,
 }
 
-/**
- * @typedef {(string|number)} Reference
- */
-type Reference = string | number;
-
 type Pointer = {
 	ID: string,
-	Reference: Reference,
+	Reference: string | number,
 	Containers: string[]
 }
 
@@ -44,15 +35,6 @@ type ContainerTable =
 {
 	ID: number
 	Content: Push
-}
-
-type DeleteType = 
-{
-	KeyName: string | number,
-	KeyValue: Push	
-} |
-{
-	TableID: number | string
 }
 
 export interface Client
@@ -74,10 +56,6 @@ export class Client extends BaseClient
 	 */
 	
 	/**
-	 * @typedef {(string | number)} Reference
-	 */
-	
-	/**
 	 * @typedef {(object[] | string[] | number[])} AnyArray
 	 */
 	
@@ -93,8 +71,6 @@ export class Client extends BaseClient
 	constructor(Options: ClientOptions)
 	{
 		super();
-
-		const start = Date.now();
 
 		this.Options = Options;
 
@@ -120,10 +96,18 @@ export class Client extends BaseClient
 		BSON.setInternalBufferSize(500);
 
 		this.emit("start");
+	}
 
-		const end = Date.now();
+	private CheckFolders(): void
+	{
+		if (!fs.existsSync(__dirname + `/${this.Options.Path}`))
+			throw new Error("(ODB-01) The path you specified was not found.");
 
-		console.log(colors.gray("Set class vars ") + ((end - start) > 1 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
+		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB`))
+			throw new Error("(ODB-02) The database root folder not exists.");
+
+		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}`))
+			throw new Error("(ODB-03) This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.");
 	}
 
 	/**
@@ -134,8 +118,6 @@ export class Client extends BaseClient
 	 */
 	public async Start(): Promise<this>
 	{
-		const start = Date.now();
-
 		if (typeof this.Options.Path === "undefined")
 			throw new Error("An error occurred and the path was not specified.");
 
@@ -154,10 +136,6 @@ export class Client extends BaseClient
 			{
 				if (Error) this.emit("error", Error);
 			});
-
-		const end = Date.now();
-
-		console.log(colors.gray("Create root folder ") + ((end - start) > 500 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
 
 		return this;
 	}
@@ -184,19 +162,11 @@ export class Client extends BaseClient
 			return this;
 		}
 
-		let start = Date.now();
-
 		await fs.promises.mkdir(__dirname + `/${this.Options.Path}/OpenDB/${Name}`, { recursive: true })
 			.catch((Error) =>
 			{
 				if (Error) this.emit("error", Error);
 			});
-
-		let end = Date.now();
-
-		console.log(colors.gray("Create directory OpenDB ") + ((end - start) > 500 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
-		start = Date.now();
 
 		await fs.promises.mkdir(__dirname + `/${this.Options.Path}/OpenDB/${Name}/Pointers`, { recursive: true })
 			.catch((Error) =>
@@ -204,21 +174,11 @@ export class Client extends BaseClient
 				if (Error) this.emit("error", Error);
 			});
 
-		end = Date.now();
-
-		console.log(colors.gray("Create directory Pointers ") + ((end - start) > 500 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
-		start = Date.now();
-
 		await fs.promises.mkdir(__dirname + `/${this.Options.Path}/OpenDB/${Name}/Containers`, { recursive: true })
 			.catch((Error) =>
 			{
 				if (Error) this.emit("error", Error);
 			});
-
-		end = Date.now();
-
-		console.log(colors.gray("Create directory Containers ") + ((end - start) > 5 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
 
 		return this;
 	}
@@ -233,8 +193,6 @@ export class Client extends BaseClient
 	 */
 	public SetDatabase(Name: string, Force?: boolean | false, NotLoad?: boolean | false): this
 	{
-		const start = Date.now();
-
 		if (typeof this.Options.Path === "string")
 		{
 			if (!fs.existsSync(__dirname + `/${this.Options.Path}`))
@@ -309,33 +267,20 @@ export class Client extends BaseClient
 		{
 			console.log("(Warn-03) This can cause loading times to increase significantly.");
 		}
-
-		const end = Date.now();
-
-		console.log(colors.gray("Set database ") + ((end - start) >= 5 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
+		
 		return this;
 	}
 
 	/**
 	 * @public
 	 * @async
-	 * @param {Reference} Reference - Reference to find the pointer easier
+	 * @param {(string|number)} Reference - Reference to find the pointer easier
 	 * @description Create pointer
 	 * @returns {Promise<void>}
 	 */
-	public async CreatePointer(Reference: Reference): Promise<void>
+	public async CreatePointer(Reference: string | number): Promise<void>
 	{
-		const start = Date.now();
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}`))
-			throw new Error("(ODB-01) The path you specified was not found.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB`))
-			throw new Error("(ODB-02) The database root folder not exists.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}`))
-			throw new Error("(ODB-03) This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.");
+		this.CheckFolders();
 
 		if (this.GetPointer(Reference) !== undefined)
 		{
@@ -371,32 +316,17 @@ export class Client extends BaseClient
 
 		this.Pointers.set(IDPointer, pointer);
 		this.Containers.set(IDContainer, container);
-
-		const end = Date.now();
-
-		console.log(colors.gray("Create Pointer ") + ((end - start) > 10 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
-		console.log(colors.gray("pointer: ") + colors.yellow(`${IDPointer}`) + colors.gray(" => ") + colors.gray("containers: ") + colors.yellow(`${IDContainer}`));
 	}
 
 	/**
 	 * @public
-	 * @param {Reference} Reference - Reference to find the pointer easier
+	 * @param {(string|number)} Reference - Reference to find the pointer easier
 	 * @description Get pointer
 	 * @returns {BSON.Document}
 	 */
-	public GetPointer(Reference: Reference): BSON.Document | undefined
+	public GetPointer(Reference: string | number): BSON.Document | undefined
 	{
-		const start = Date.now();
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}`))
-			throw new Error("(ODB-01) The path you specified was not found.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB`))
-			throw new Error("(ODB-02) The database root folder not exists.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}`))
-			throw new Error("(ODB-03) This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.");
+		this.CheckFolders();
 
 		let Pointer = undefined;
 
@@ -422,10 +352,6 @@ export class Client extends BaseClient
 			}
 		}
 
-		const end = Date.now();
-
-		console.log(colors.gray("Get Pointer ") + ((end - start) > 10 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
 		return Pointer;
 	}
 
@@ -437,18 +363,8 @@ export class Client extends BaseClient
 	 */
 	public GetContainer(Container: string): BSON.Document | undefined
 	{
-		const start = Date.now();
+		this.CheckFolders();
 		
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}`))
-			throw new Error("(ODB-01) The path you specified was not found.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB`))
-			throw new Error("(ODB-02) The database root folder not exists.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}`))
-			throw new Error("(ODB-03) This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.");
-
-
 		if (!this.Containers.get(Container))
 		{
 			let container = undefined;
@@ -464,19 +380,11 @@ export class Client extends BaseClient
 				}
 			}
 
-			const end = Date.now();
-
-			console.log(colors.gray("Get Container ") + ((end - start) > 10 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
 			return container;
 
-		} else
+		} 
+		else
 		{
-			const end = Date.now();
-
-			console.log(colors.gray("Get Container ") + ((end - start) > 10 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
-
 			return this.Containers.get(Container);
 		}
 	}
@@ -485,24 +393,15 @@ export class Client extends BaseClient
 	 * @public
 	 * @async
 	 * @param {Push} Content - Push content
-	 * @param {Reference} Reference - Reference to find the pointer easier
+	 * @param {(string|number)} Reference - Reference to find the pointer easier
 	 * @param {(number|string)} id - Table ID
 	 * @param {string} [Container=false] - Container ID
 	 * @description Push data to container
 	 * @returns {Promise<void>}
 	 */
-	public async Push<T extends Push>(Content: T, Reference: Reference, id?: number | string, Container?: string): Promise<void>
+	public async Push<T extends Push>(Content: T, Reference: string | number, id?: number | string, Container?: string): Promise<void>
 	{
-		const start = Date.now();
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}`))
-			throw new Error("(ODB-01) The path you specified was not found.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB`))
-			throw new Error("(ODB-02) The database root folder not exists.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}`))
-			throw new Error("(ODB-03) This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.");
+		this.CheckFolders();
 
 		const pointer = this.GetPointer(Reference);
 
@@ -561,10 +460,6 @@ export class Client extends BaseClient
 			};
 
 			this.Containers.set(container.ID, container);
-
-			const end = Date.now();
-
-			console.log(colors.gray("Push ") + ((end - start) > 500 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
 
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
@@ -625,10 +520,6 @@ export class Client extends BaseClient
 
 			this.Containers.set(container.ID, container);
 
-			const end = Date.now();
-
-			console.log(colors.gray("Push ") + ((end - start) > 10 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
@@ -639,22 +530,15 @@ export class Client extends BaseClient
 
 	/**
 	 * @public
-	 * @param {Reference} Reference - Reference to find the pointer easier
+	 * @param {(string|number)} Reference - Reference to find the pointer easier
 	 * @param {string} [Container=false] - Container ID
 	 * @description Add an existing container or not, to a pointer
 	 * @returns {void}
 	 */
-	public AddContainer(Reference: Reference, Container?: string | null): void
+	public async AddContainer(Reference: string | number, Container?: string | null): Promise<void>
 	{
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}`))
-			throw new Error("(ODB-01) The path you specified was not found.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB`))
-			throw new Error("(ODB-02) The database root folder not exists.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}`))
-			throw new Error("(ODB-03) This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.");
-
+		this.CheckFolders();
+		
 		const Pointer = this.GetPointer(Reference);
 		const containers = [];
 
@@ -664,10 +548,10 @@ export class Client extends BaseClient
 		if (typeof Container === "string")
 		{
 			if (Container.length !== 18)
-				throw new Error("(ODB-10) This ID is not correct");
+				throw new Error("(ODB-09) This ID is not correct");
 
 			if (!this.Containers.get(Container))
-				throw new Error("(ODB-10) This ID is not correct");
+				throw new Error("(ODB-09) This ID is not correct");
 
 			containers.push(Container);
 		}
@@ -699,21 +583,17 @@ export class Client extends BaseClient
 			Containers: containers
 		});
 
-		fs.writeFile(__dirname + `/${this.Options.Path}/OpenDB/Containers/${Pointer.ID}.bson`, BSON.serialize(pointer), (error) =>
-		{
-			if (error) this.emit("error", error);
-		});
-
-		const time = new Date();
-
-		console.log("AddContainer to pointer");
-		console.log(time.getMilliseconds() + "ms" + "\n" + time.getSeconds() + "s");
+		await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/Containers/${Pointer.ID}.bson`, BSON.serialize(pointer))
+			.catch((error) => 
+			{
+				if (error) this.emit("error", error);
+			});
 	}
 	
 	/**
 	 * @public
 	 * @async
-	 * @param {Reference} Reference - Reference to find the pointer easier
+	 * @param {(string|number)} Reference - Reference to find the pointer easier
 	 * @param {(number|string|null)} KeyName - Key name to search the container
 	 * @param {Push} KeyValue - Key value to search the container
 	 * @param {Push} Value - Value to define
@@ -722,19 +602,10 @@ export class Client extends BaseClient
 	 * @description Edit a key in the container
 	 * @returns {Promise<void>}
 	 */
-	public async Edit<T extends Push>(Reference: Reference, KeyName: number | string | null, KeyValue: T, Value: T, TableId?: number, Container?: string): Promise<void> 
+	public async Edit<T extends Push>(Reference: string | number, KeyName: number | string | null, KeyValue: T, Value: T, TableId?: number, Container?: string): Promise<void> 
 	{
-		const start = Date.now();
-		
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}`))
-			throw new Error("(ODB-01) The path you specified was not found.");
+		this.CheckFolders();
 
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB`))
-			throw new Error("(ODB-02) The database root folder not exists.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}`))
-			throw new Error("(ODB-03) This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.");
-		
 		const _pointer = this.GetPointer(Reference);
 	
 		if (typeof _pointer === "undefined" || !_pointer)
@@ -743,13 +614,13 @@ export class Client extends BaseClient
 		if (typeof Container === "string")
 		{
 			if (Container.length !== 18)
-				throw new Error("(ODB-10) This ID is not correct");
+				throw new Error("(ODB-09) This ID is not correct");
 			
 			const _container = this.Containers.get(Container);
 			let found = false;
 	
 			if (!_container)
-				throw new Error("(ODB-10) This ID is not correct");
+				throw new Error("(ODB-09) This ID is not correct");
 			
 			_container.Tables.forEach((x: any, i: number) =>
 			{
@@ -805,10 +676,6 @@ export class Client extends BaseClient
 			};
 
 			this.Containers.set(container.ID, container);
-
-			const end = Date.now();
-
-			console.log(colors.gray("Edit key ") + ((end - start) > 10 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
 
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
@@ -880,10 +747,6 @@ export class Client extends BaseClient
 
 				this.Containers.set(container.ID, container);
 
-				const end = Date.now();
-
-				console.log(colors.gray("Edit key ") + ((end - start) > 10 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
 				await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 					.catch((error) =>
 					{
@@ -892,28 +755,186 @@ export class Client extends BaseClient
 			});
 		}		
 	}
+	
+	/**
+	 * @public
+	 * @async
+	 * @param {(string|number)} Reference - Reference to find the pointer easier
+	 * @param {(string | number | null)} KeyName - Key name to search the container
+	 * @param {Push} KeyValue - Key value to search the container
+	 * @param {string} [Container=false] - Container ID
+	 * @description Search table by a key
+	 * @returns {Promise<ContainerTable | undefined>}
+	 */
+	public Find<T extends Push>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): ContainerTable | undefined
+	{
+		this.CheckFolders();
+
+		const _pointer = this.GetPointer(Reference);
+	
+		if (typeof _pointer === "undefined" || !_pointer)
+			throw new Error("(ODB-05) Pointer not found");
+		
+		if (typeof Container === "string")
+		{
+			if (Container.length !== 18)
+				throw new Error("(ODB-09) This ID is not correct");
+			
+			const _container = this.Containers.get(Container);
+			let found = false;
+			let table: ContainerTable | undefined;
+	
+			if (!_container)
+				throw new Error("(ODB-09) This ID is not correct");
+			
+			_container.Tables.forEach((x: any, i: number) =>
+			{
+				if (typeof x.Content === "string" || Array.isArray(x.Content) || typeof x.Content === "number" && KeyName === null) 
+				{
+					if (x.Content === KeyValue)
+					{
+						found = true;
+						table = x;
+					}
+				} 
+				else if (typeof x.Content === "object" && KeyName != null) 
+				{
+					if (x.Content[KeyName] === KeyValue)
+					{
+						found = true;
+						table = x;
+					}
+				}
+			});
+			
+			if (!found || !table)
+				throw new Error("(ODB-08) Key not found");
+			
+			return table;
+		}
+		else 
+		{
+			let table: ContainerTable | undefined;
+			
+			_pointer.Containers.forEach(async (x: any) => {
+				const _container = this.Containers.get(x);
+				let found = false;
+	
+				if (!_container)
+					throw new Error("This ID is not correct");
+				
+				_container.Tables.forEach((x: any, i: number) =>
+				{
+					if (typeof x.Content === "string" || Array.isArray(x.Content) || typeof x.Content === "number" && KeyName === null) 
+					{
+						if (x.Content === KeyValue)
+						{
+							found = true;
+							table = x;
+						}
+					} 
+					else if (typeof x.Content === "object" && KeyName != null) 
+					{
+						if (x.Content[KeyName] === KeyValue)
+						{
+							found = true;
+							table = x;
+						}
+					}
+				});
+				
+				if (!found || !table)
+					throw new Error("(ODB-08) Key not found");
+			});
+			
+			return table;
+		}
+	}
+	
+	/**
+	 * @public
+	 * @async
+	 * @param {(string|number)} Reference - Reference to find the pointer easier
+	 * * @param {number} TableId - TableId ID
+	 * @param {string} [Container=false] - Container ID
+	 * @description Get table by a table id
+	 * @returns {Promise<ContainerTable | undefined>}
+	 */
+	public Get(Reference: string | number, TableId: number, Container?: string): ContainerTable | undefined
+	{
+		this.CheckFolders();
+
+		const _pointer = this.GetPointer(Reference);
+	
+		if (typeof _pointer === "undefined" || !_pointer)
+			throw new Error("(ODB-05) Pointer not found");
+		
+		if (typeof Container === "string")
+		{
+			if (Container.length !== 18)
+				throw new Error("(ODB-09) This ID is not correct");
+			
+			const _container = this.Containers.get(Container);
+			let found = false;
+			let table: ContainerTable | undefined;
+	
+			if (!_container)
+				throw new Error("(ODB-09) This ID is not correct");
+			
+			_container.Tables.forEach((x: any, i: number) =>
+			{
+				if (x.ID === TableId) 
+				{
+					found = true;
+					table = x;
+				}
+			});
+			
+			if (!found || !table)
+				throw new Error("(ODB-08) Key not found");
+
+			return table;
+		}
+		else 
+		{
+			let table: ContainerTable | undefined;
+			
+			_pointer.Containers.forEach(async (x: any) => {
+				const _container = this.Containers.get(x);
+				let found = false;
+	
+				if (!_container)
+					throw new Error("This ID is not correct");
+				
+				_container.Tables.forEach((x: any, i: number) =>
+				{
+					if (x.ID === TableId) 
+					{
+						found = true;
+						table = x;
+					}
+				});
+				
+				if (!found || !table)
+					throw new Error("(ODB-08) Key not found");
+			});
+			
+			return table;
+		}
+	}
 
 	/**
 	 * @public
 	 * @async
-	 * @param {Reference} Reference - Reference to find the pointer easier
+	 * @param {(string|number)} Reference - Reference to find the pointer easier
 	 * @param {number} TableId - Table ID
 	 * @param {string} [Container=false] - Container ID
 	 * @description Delete Table
 	 * @returns {Promise<void>}
 	 */
-	public async DeleteTable(Reference: Reference, TableId: number, Container?: string): Promise<void>
+	public async DeleteTable(Reference: string | number, TableId: number, Container?: string): Promise<void>
 	{
-		const start = Date.now();
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}`))
-			throw new Error("(ODB-01) The path you specified was not found.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB`))
-			throw new Error("(ODB-02) The database root folder not exists.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}`))
-			throw new Error("(ODB-03) This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.");
+		this.CheckFolders();
 
 		const pointer = this.GetPointer(Reference);
 
@@ -952,10 +973,6 @@ export class Client extends BaseClient
 
 			this.Containers.set(container.ID, container);
 
-			const end = Date.now();
-
-			console.log(colors.gray("Delete key ") + ((end - start) > 500 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
@@ -988,10 +1005,6 @@ export class Client extends BaseClient
 
 			this.Containers.set(container.ID, container);
 
-			const end = Date.now();
-
-			console.log(colors.gray("Delete key ") + ((end - start) > 500 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
@@ -1003,25 +1016,16 @@ export class Client extends BaseClient
 	/**
 	 * @public
 	 * @async
-	 * @param {Reference} Reference - Reference to find the pointer easier
+	 * @param {(string|number)} Reference - Reference to find the pointer easier
 	 * @param {(string | number | null)} KeyName - Key name to search the container
 	 * @param {Push} KeyValue - Key value to search the container
 	 * @param {string} [Container=false] - Container ID
 	 * @description Delete Table by Key
 	 * @returns {Promise<void>}
 	 */
-	public async DeleteTableByKey<T extends Push>(Reference: Reference, KeyName: string | number | null, KeyValue: T, Container?: string): Promise<void>
+	public async DeleteTableByKey<T extends Push>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): Promise<void>
 	{
-		const start = Date.now();
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}`))
-			throw new Error("(ODB-01) The path you specified was not found.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB`))
-			throw new Error("(ODB-02) The database root folder not exists.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}`))
-			throw new Error("(ODB-03) This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.");
+		this.CheckFolders();
 
 		const pointer = this.GetPointer(Reference);
 
@@ -1072,10 +1076,6 @@ export class Client extends BaseClient
 
 			this.Containers.set(container.ID, container);
 
-			const end = Date.now();
-
-			console.log(colors.gray("Delete key ") + ((end - start) > 500 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
@@ -1120,10 +1120,6 @@ export class Client extends BaseClient
 
 			this.Containers.set(container.ID, container);
 
-			const end = Date.now();
-
-			console.log(colors.gray("Delete key ") + ((end - start) > 500 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
@@ -1135,25 +1131,16 @@ export class Client extends BaseClient
 	/**
 	 * @public
 	 * @async
-	 * @param {Reference} Reference - Reference to find the pointer easier
+	 * @param {(string|number)} Reference - Reference to find the pointer easier
 	 * @param {(number|string|null)} KeyName - Key name to search the container
 	 * @param {Push} KeyValue - Key value to search the container
 	 * @param {string} [Container=false] - Container ID
 	 * @description Delete Key
 	 * @returns {Promise<void>}
 	 */
-	public async DeleteKey<T extends Push>(Reference: Reference, KeyName: string | number | null, KeyValue: T, Container?: string): Promise<void>
+	public async DeleteKey<T extends Push>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): Promise<void>
 	{
-		const start = Date.now();
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}`))
-			throw new Error("(ODB-01) The path you specified was not found.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB`))
-			throw new Error("(ODB-02) The database root folder not exists.");
-
-		if (!fs.existsSync(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}`))
-			throw new Error("(ODB-03) This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.");
+		this.CheckFolders();
 
 		const pointer = this.GetPointer(Reference);
 
@@ -1204,10 +1191,6 @@ export class Client extends BaseClient
 
 			this.Containers.set(container.ID, container);
 
-			const end = Date.now();
-
-			console.log(colors.gray("Delete key ") + ((end - start) > 500 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
-
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
@@ -1251,10 +1234,6 @@ export class Client extends BaseClient
 				throw new Error("(ODB-08) Key not found");
 
 			this.Containers.set(container.ID, container);
-
-			const end = Date.now();
-
-			console.log(colors.gray("Delete key ") + ((end - start) > 500 ? colors.yellow(`${end - start}ms`) : colors.green(`${end - start}ms`)));
 
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
