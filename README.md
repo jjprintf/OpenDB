@@ -2,7 +2,9 @@
 
 # **IMPORTANT! The package is a pre-release, it's not finished, it shouldn't be used yet.**
 
+
 > Documentation: [OpenDB Docs](https://printfdead.github.io/ajaxdb/index.html)
+
 # Information:
 - :wrench: Efficient and fast database using BSON.
 - :butterfly: Simple and easy to use
