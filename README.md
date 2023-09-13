@@ -140,7 +140,7 @@ await OpenDB.Push<string>("This content can be object, string, number and array"
  * @param {Reference} Reference - Reference to find the pointer easier
  * @param {string} Container (optional) - Container ID
  * @description Add an existing container or not, to a pointer
- * @returns void
+ * @returns Promise<void>
  */
 
 await OpenDB.AddContainer("Pointer reference", "Container ID");
@@ -172,7 +172,7 @@ await OpenDB.Edit<string>("Pointer Reference", null, "Test1", "Test2", 1, "Conta
  * @param {Push} KeyValue - Key value to search the container
  * @param {string} Container (optional) - Container ID
  * @description Search table by a key
- * @returns Promise<ContainerTable | undefined>
+ * @returns ContainerTable | undefined
  */
 
 OpenDB.Find<string>("Pointer Reference", null, "Test1", "Container ID");
@@ -187,7 +187,7 @@ OpenDB.Find<string>("Pointer Reference", null, "Test1", "Container ID");
  * @param {number} TableId - TableId ID
  * @param {string} Container (optional) - Container ID
  * @description Get table by a table id
- * @returns Promise<ContainerTable | undefined>
+ * @returns ContainerTable | undefined
  */
 
 OpenDB.Get("Pointer Reference", 1, "Container ID");
