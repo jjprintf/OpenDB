@@ -1,6 +1,6 @@
 # @OpenDB
 
-> Documentation: [OpenDB Docs](https://printfdead.github.io/ajaxdb/index.html)
+> Documentation: [OpenDB Docs](https://printfdead.github.io/opendb/index.html)
 
 # Information:
 - :wrench: Efficient and fast database using BSON.
@@ -9,7 +9,7 @@
 
 # Installation
 ```sh
-npm i open.db --save
+npm i @printfdead/open.db --save
 ```
 
 # Important Notes:
@@ -19,7 +19,7 @@ npm i open.db --save
 # Examples:
 - `Create Database & Start Client Instance:`
 ```ts
-import { Client } from 'open.db';
+import { Client } from '@printfdead/open.db';
 
 /**
  * @param {object} options - Put database name and path
@@ -34,7 +34,7 @@ const OpenDB = new Client({ Path: "path/to/root/folder" });
  * @description The event is emitted when the Client class is instantiated.
 */
 OpenDB.on('start', () => {
-  console.log("AjaxDB start!");
+  console.log("OpenDB start!");
 });
 
 /** 
