@@ -2,6 +2,7 @@
 src/
 docs/
 OpenDB/
+.vs/
 
 # Files
 .eslintrc

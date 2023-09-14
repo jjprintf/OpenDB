@@ -2,22 +2,43 @@
 
 > Documentation: [OpenDB Docs](https://printfdead.github.io/opendb/index.html)
 
-# Information:
+![Typescript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Node](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![NPM](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)
+
+## Information:
 - :wrench: Efficient and fast database using BSON.
 - :butterfly: Simple and easy to use
-- :smile: Version 2.4
+- :smile: Version 1.3
 
-# Installation
+### ?? Installation
 ```sh
 npm i @printfdead/open.db --save
 ```
 
-# Important Notes:
-- BSON Error: **bson size must be >= 5, is 0** This is solved by deleting the OpenDB folder and restarting the app, it is because the containers and pointers were not saved correctly.
-- Errors: The errors and/or warnings shown in this documentation are errors/warns that can occur when running OpenDB, they are only informative, a solution can be reached by reading the description of each error/warn.
+## Why use OpenDB
 
-# Examples:
-- `Create Database & Start Client Instance:`
+### ?? Developer experience
+> `OpenDB` offers a new, fast and secure experience for storing your data, using a simple structure.
+> Given its speed, it allows you to save multiple data, it also allows you to have several databases in use at the same time, such as working with several containers on the same pointer.
+
+### ?? Structure
+<img height="300" src="assets/Structure.png" alt="OpenDB Structure">
+
+### ? Flexibility & Scalability
+> This database is flexible. 
+> But it is not scalable since it is designed for fast, small/medium environments and where not much data needs to be saved since it is not scalable (Example: discord bots, web pages where not much data needs to be saved, bots in other applications, other environments that have these characteristics)
+
+### ?? Cache
+> It saves the data in a `Map` which makes it easier to search and use the database, making it much faster, making the time it takes to execute a method no more than **10ms**
+
+### ?? Important Notes:
+> **BSON Error: bson size must be >= 5, is 0** This is solved by deleting the `OpenDB` folder and restarting the app, it is because the containers and pointers were not saved correctly.
+
+> The errors and/or warnings shown in this documentation are errors/warns that can occur when running `OpenDB`, they are only informative, a solution can be reached by reading the description of each error/warn.
+
+### ?? Examples:
+> `Create Database & Start Client Instance:`
 ```ts
 import { Client } from '@printfdead/open.db';
 
@@ -49,10 +70,10 @@ OpenDB.on('error', (error) => {
 
 // Other conditions instantiate the Error clas and stop the database
 ```
-### Note:
+#### Note:
 - **Path:** must not start with dot (".", except two dots, EJ: "..") or slashes (/, \) or end in slash
 ---
-- `Start`
+> `Start`
 ```ts
 /**
  * @description Create the root folder (database container)
@@ -62,7 +83,7 @@ OpenDB.on('error', (error) => {
 await OpenDB.Start();
 ```
 ---
-- `CreateDatabase`
+> `CreateDatabase`
 ```ts
 /**
  * @param {string} Name - Database name
@@ -73,7 +94,7 @@ await OpenDB.Start();
 await OpenDB.CreateDatabase("DatabaseName");
 ```
 ---
-- `SetDatabase`
+> `SetDatabase`
 ```ts
 /**
  * @param {string} Name - Database name
@@ -86,7 +107,7 @@ await OpenDB.CreateDatabase("DatabaseName");
 OpenDB.SetDatabase("DatabaseName");
 ```
 ---
-- `CreatePointer`
+> `CreatePointer`
 ```ts
 /**
  * @param {String | Number} Reference - A reference to search faster
@@ -97,7 +118,7 @@ OpenDB.SetDatabase("DatabaseName");
 await OpenDB.CreatePointer("PointerReference");
 ```
 ---
-- `GetPointer`
+> `GetPointer`
 ```ts
 /**
  * @param {String | Number} Reference - A reference to search faster
@@ -108,7 +129,7 @@ await OpenDB.CreatePointer("PointerReference");
 OpenDB.GetPointer("PointerReference");
 ```
 ---
-- `GetContainer`
+> `GetContainer`
 ```ts
 /**
  * @param {string} Container - Container ID
@@ -119,7 +140,7 @@ OpenDB.GetPointer("PointerReference");
 OpenDB.GetContainer("ContainerID");
 ```
 ---
-- `Push`
+> `Push`
 ```ts
 /**
  * @param {String | Number | Object | Array} Content - Content push
@@ -134,7 +155,7 @@ OpenDB.GetContainer("ContainerID");
 await OpenDB.Push<string>("This content can be object, string, number and array", "Pointer Reference", 1, "Container ID");
 ```
 ---
-- `AddContainer`
+> `AddContainer`
 ```ts
 /**
  * @param {Reference} Reference - Reference to find the pointer easier
@@ -146,7 +167,7 @@ await OpenDB.Push<string>("This content can be object, string, number and array"
 await OpenDB.AddContainer("Pointer reference", "Container ID");
 ```
 ---
-- `Edit`
+> `Edit`
 ```ts
 /**
  * @param {Reference} Reference - Reference to find the pointer easier
@@ -161,10 +182,10 @@ await OpenDB.AddContainer("Pointer reference", "Container ID");
 
 await OpenDB.Edit<string>("Pointer Reference", null, "Test1", "Test2", 1, "Container ID");
 ```
-### Note:
+#### Note:
 - **KeyName:** If your KeyName is not an object just put null.
 ---
-- `Find`
+> `Find`
 ```ts
 /**
  * @param {(string|number)} Reference - Reference to find the pointer easier
@@ -177,10 +198,10 @@ await OpenDB.Edit<string>("Pointer Reference", null, "Test1", "Test2", 1, "Conta
 
 OpenDB.Find<string>("Pointer Reference", null, "Test1", "Container ID");
 ```
-### Note:
+#### Note:
 - **KeyName:** If your KeyName is not an object just put null.
 ---
-- `Get`
+> `Get`
 ```ts
 /**
  * @param {(string|number)} Reference - Reference to find the pointer easier
@@ -193,7 +214,7 @@ OpenDB.Find<string>("Pointer Reference", null, "Test1", "Container ID");
 OpenDB.Get("Pointer Reference", 1, "Container ID");
 ```
 ---
-- `DeleteTable`
+> `DeleteTable`
 ```ts
 /**
 	* @param {Reference} Reference - Reference to find the pointer easier
@@ -206,7 +227,7 @@ OpenDB.Get("Pointer Reference", 1, "Container ID");
 await OpenDB.DeleteTable("Pointer Reference", 1, "Container ID");
 ```
 ---
-- `DeleteTableByKey`
+> `DeleteTableByKey`
 ```ts
 /** 
  * @param {Reference} Reference - Reference to find the pointer easier
@@ -219,10 +240,10 @@ await OpenDB.DeleteTable("Pointer Reference", 1, "Container ID");
 
 await OpenDB.DeleteTableByKey<string>("Pointer Reference", null, "Test1", "Container ID");
 ```
-### Note:
+#### Note:
 - **KeyName:** If your KeyName is not an object just put null.
 ---
-- `DeleteKey`
+> `DeleteKey`
 ```ts
 /**
  * @param {Reference} Reference - Reference to find the pointer easier
@@ -235,10 +256,10 @@ await OpenDB.DeleteTableByKey<string>("Pointer Reference", null, "Test1", "Conta
 
 await OpenDB.DeleteKey<string>("Pointer Reference", null, "Test1", "Container ID");
 ```
-### Note:
+#### Note:
 - **KeyName:** If your KeyName is not an object just put null.
 ---
-- `Encrypt`
+> `Encrypt`
 ```ts
 /**
  * @param {String | Number} Content - Content encrypt data
@@ -249,7 +270,7 @@ await OpenDB.DeleteKey<string>("Pointer Reference", null, "Test1", "Container ID
 const encryptData = OpenDB.Encrypt<string | number>("Content"); // Salt: number (optional)
 ```
 ---
-- `Decrypt`
+> `Decrypt`
 ```ts
 /** 
  * @param {DecryptOptions} options - Options decrypt data
@@ -259,7 +280,7 @@ const encryptData = OpenDB.Encrypt<string | number>("Content"); // Salt: number 
 const decryptedData = OpenDB.decrypt({ EncryptKey: encryptData.key_encrypted.toString(), SecretKey: encryptData.secret_key});
 ```
 
-## Possible Errors:
+#### :exclamation: Possible Errors:
 - (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
 - (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found.
 - (ODB-03) **This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.** This error is because the database is not created.
@@ -271,14 +292,12 @@ const decryptedData = OpenDB.decrypt({ EncryptKey: encryptData.key_encrypted.toS
 - (ODB-09) **This ID is not correct.** This error is because the container id is not correct.
 - (ODB-99) **An error occurred and the path was not specified.** This error can occured because the path could not be defined automatically or for other internal reasons.
 
-## Possible Warns:
+#### :interrobang: Possible Warns:
 - (Warn-01) **The root folder already exists, nothing will be created and this function will be skipped.** This warn is because the root folder already exists, it will not affect the code but it will warn that it already exists, so you can delete the 'Start()' function from the code.
 - (Warn-02) **The database already exists.** This is because the database already exists, it will not do anything, the function will be skipped.
 - (Warn-03) **This can cause loading times to increase significantly.** it is because 'NotLoad' is true
 - (Warn-04) **A pointer with this reference already exists, the pointer will not be created.** This is because the pointer with the same reference already exists, it will not give an error, the function will be skipped.
 
-## Development notes
-- The database is in the testing phase, report any errors.
-- :star: Thanks you for reading!
-
-**[Support Discord](https://discord.gg/ZdMqhEWhUN)**
+## See more
+[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/ZdMqhEWhUN)
+[![Documentation](https://img.shields.io/badge/Documentation-00386F?style=for-the-badge&logo=gitbook&logoColor=white)](https://printfdead.github.io/opendb)
