@@ -11,33 +11,33 @@
 - :butterfly: Simple and easy to use
 - :smile: Version 1.3
 
-### ?? Installation
+### :wrench: Installation
 ```sh
 npm i @printfdead/open.db --save
 ```
 
 ## Why use OpenDB
 
-### ?? Developer experience
+### :art: Developer experience
 > `OpenDB` offers a new, fast and secure experience for storing your data, using a simple structure.
 > Given its speed, it allows you to save multiple data, it also allows you to have several databases in use at the same time, such as working with several containers on the same pointer.
 
-### ?? Structure
+### :pushpin: Structure
 <img height="300" src="assets/Structure.png" alt="OpenDB Structure">
 
-### ? Flexibility & Scalability
+### :zap: Flexibility & Scalability
 > This database is flexible. 
 > But it is not scalable since it is designed for fast, small/medium environments and where not much data needs to be saved since it is not scalable (Example: discord bots, web pages where not much data needs to be saved, bots in other applications, other environments that have these characteristics)
 
-### ?? Cache
+### :package: Cache
 > It saves the data in a `Map` which makes it easier to search and use the database, making it much faster, making the time it takes to execute a method no more than **10ms**
 
-### ?? Important Notes:
+### :clipboard: Important Notes:
 > **BSON Error: bson size must be >= 5, is 0** This is solved by deleting the `OpenDB` folder and restarting the app, it is because the containers and pointers were not saved correctly.
 
 > The errors and/or warnings shown in this documentation are errors/warns that can occur when running `OpenDB`, they are only informative, a solution can be reached by reading the description of each error/warn.
 
-### ?? Examples:
+### :pencil: Examples:
 > `Create Database & Start Client Instance:`
 ```ts
 import { Client } from '@printfdead/open.db';
@@ -280,7 +280,7 @@ const encryptData = OpenDB.Encrypt<string | number>("Content"); // Salt: number 
 const decryptedData = OpenDB.decrypt({ EncryptKey: encryptData.key_encrypted.toString(), SecretKey: encryptData.secret_key});
 ```
 
-#### :exclamation: Possible Errors:
+### :exclamation: Possible Errors:
 - (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
 - (ODB-02) **The database root folder not exists.** This error is due to the root folder (OpenDB/) not being found.
 - (ODB-03) **This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.** This error is because the database is not created.
@@ -292,7 +292,7 @@ const decryptedData = OpenDB.decrypt({ EncryptKey: encryptData.key_encrypted.toS
 - (ODB-09) **This ID is not correct.** This error is because the container id is not correct.
 - (ODB-99) **An error occurred and the path was not specified.** This error can occured because the path could not be defined automatically or for other internal reasons.
 
-#### :interrobang: Possible Warns:
+### :interrobang: Possible Warns:
 - (Warn-01) **The root folder already exists, nothing will be created and this function will be skipped.** This warn is because the root folder already exists, it will not affect the code but it will warn that it already exists, so you can delete the 'Start()' function from the code.
 - (Warn-02) **The database already exists.** This is because the database already exists, it will not do anything, the function will be skipped.
 - (Warn-03) **This can cause loading times to increase significantly.** it is because 'NotLoad' is true
