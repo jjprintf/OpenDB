@@ -9,33 +9,11 @@ import BSON from 'bson';
 
 import { uid } from 'uid';
 
-import { BaseClient } from './BaseClient';
+import { Emitter } from './NodeEmitter';
 
-type ClientOptions = {
-	Path?: string,
-}
+import { ClientOptions, Pointer, Push, Container, ContainerTable } from '../types';
 
-type Pointer = {
-	ID: string,
-	Reference: string | number,
-	Containers: string[]
-}
-
-type AnyArray = object[] | string[] | number[];
-
-type Push = string | object | AnyArray | number;
-
-type Container = 
-{
-	ID: string,
-	Tables: ContainerTable[]
-}
-
-type ContainerTable = 
-{
-	ID: number
-	Content: Push
-}
+import parsePath from '../helpers/parsePath';
 
 export interface Client
 {
@@ -48,7 +26,7 @@ export interface Client
 	Containers: Map<string, Container>;
 }
 
-export class Client extends BaseClient
+export class Client
 {
 	/**
 	 * @typedef {Object} ClientOptions
@@ -70,22 +48,15 @@ export class Client extends BaseClient
 	 */
 	constructor(Options: ClientOptions)
 	{
-		super();
-
 		this.Options = Options;
 
 		if (typeof this.Options.Path === "undefined")
 		{
-			this.Options.Path = "../../../";
+			this.Options.Path = "../../../../";
 		}
 		else
 		{
-			if (this.Options.Path.startsWith("/"))
-				this.Options.Path = this.Options.Path.slice(1);
-			if (this.Options.Path.endsWith("/"))
-				this.Options.Path = this.Options.Path.slice(0, this.Options.Path.length - 1);
-			if (this.Options.Path.startsWith("./") && !this.Options.Path.startsWith(".."))
-				this.Options.Path = this.Options.Path.slice(2);
+			this.Options.Path = parsePath(this.Options.Path);
 		}
 
 		this.Database = "none";
@@ -95,7 +66,7 @@ export class Client extends BaseClient
 
 		BSON.setInternalBufferSize(500);
 
-		this.emit("start");
+		Emitter.emit("start");
 	}
 
 	private CheckFolders(): void
@@ -134,7 +105,7 @@ export class Client extends BaseClient
 		await fs.promises.mkdir(__dirname + `/${this.Options.Path}/OpenDB`, { recursive: true })
 			.catch((Error) =>
 			{
-				if (Error) this.emit("error", Error);
+				if (Error) Emitter.emit("error", Error);
 			});
 
 		return this;
@@ -165,19 +136,19 @@ export class Client extends BaseClient
 		await fs.promises.mkdir(__dirname + `/${this.Options.Path}/OpenDB/${Name}`, { recursive: true })
 			.catch((Error) =>
 			{
-				if (Error) this.emit("error", Error);
+				if (Error) Emitter.emit("error", Error);
 			});
 
 		await fs.promises.mkdir(__dirname + `/${this.Options.Path}/OpenDB/${Name}/Pointers`, { recursive: true })
 			.catch((Error) =>
 			{
-				if (Error) this.emit("error", Error);
+				if (Error) Emitter.emit("error", Error);
 			});
 
 		await fs.promises.mkdir(__dirname + `/${this.Options.Path}/OpenDB/${Name}/Containers`, { recursive: true })
 			.catch((Error) =>
 			{
-				if (Error) this.emit("error", Error);
+				if (Error) Emitter.emit("error", Error);
 			});
 
 		return this;
@@ -305,13 +276,13 @@ export class Client extends BaseClient
 		await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Pointers/${IDPointer}.bson`, BSON.serialize(pointer))
 			.catch((error) =>
 			{
-				if (error) this.emit("error", error);
+				if (error) Emitter.emit("error", error);
 			});
 
 		await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${IDContainer}.bson`, BSON.serialize(container))
 			.catch((error) =>
 			{
-				if (error) this.emit("error", error);
+				if (error) Emitter.emit("error", error);
 			});
 
 		this.Pointers.set(IDPointer, pointer);
@@ -464,7 +435,7 @@ export class Client extends BaseClient
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
-					if (error) this.emit("error", error);
+					if (error) Emitter.emit("error", error);
 				});
 		}
 		else
@@ -523,7 +494,7 @@ export class Client extends BaseClient
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
-					if (error) this.emit("error", error);
+					if (error) Emitter.emit("error", error);
 				});
 		}
 	}
@@ -567,7 +538,7 @@ export class Client extends BaseClient
 
 			fs.writeFile(__dirname + `/${this.Options.Path}/OpenDB/Containers/${ID}.bson`, BSON.serialize(container), (error) =>
 			{
-				if (error) this.emit("error", error);
+				if (error) Emitter.emit("error", error);
 			});
 		}
 
@@ -586,7 +557,7 @@ export class Client extends BaseClient
 		await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/Containers/${Pointer.ID}.bson`, BSON.serialize(pointer))
 			.catch((error) => 
 			{
-				if (error) this.emit("error", error);
+				if (error) Emitter.emit("error", error);
 			});
 	}
 	
@@ -680,7 +651,7 @@ export class Client extends BaseClient
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
-					if (error) this.emit("error", error);
+					if (error) Emitter.emit("error", error);
 				});
 		}
 		else 
@@ -750,7 +721,7 @@ export class Client extends BaseClient
 				await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 					.catch((error) =>
 					{
-						if (error) this.emit("error", error);
+						if (error) Emitter.emit("error", error);
 					});
 			});
 		}		
@@ -976,7 +947,7 @@ export class Client extends BaseClient
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
-					if (error) this.emit("error", error);
+					if (error) Emitter.emit("error", error);
 				});
 		}
 		else
@@ -1008,7 +979,7 @@ export class Client extends BaseClient
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
-					if (error) this.emit("error", error);
+					if (error) Emitter.emit("error", error);
 				});
 		}
 	}
@@ -1079,7 +1050,7 @@ export class Client extends BaseClient
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
-					if (error) this.emit("error", error);
+					if (error) Emitter.emit("error", error);
 				});
 		}
 		else
@@ -1123,7 +1094,7 @@ export class Client extends BaseClient
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
-					if (error) this.emit("error", error);
+					if (error) Emitter.emit("error", error);
 				});
 		}
 	}
@@ -1194,7 +1165,7 @@ export class Client extends BaseClient
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
-					if (error) this.emit("error", error);
+					if (error) Emitter.emit("error", error);
 				});
 		}
 		else
@@ -1238,7 +1209,7 @@ export class Client extends BaseClient
 			await fs.promises.writeFile(__dirname + `/${this.Options.Path}/OpenDB/${this.Database}/Containers/${container.ID}.bson`, BSON.serialize(container))
 				.catch((error) =>
 				{
-					if (error) this.emit("error", error);
+					if (error) Emitter.emit("error", error);
 				});
 		}
 	}
