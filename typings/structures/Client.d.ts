@@ -1,30 +1,12 @@
 import BSON from 'bson';
-import { BaseClient } from './BaseClient';
-type ClientOptions = {
-    Path?: string;
-};
-type Pointer = {
-    ID: string;
-    Reference: string | number;
-    Containers: string[];
-};
-type AnyArray = object[] | string[] | number[];
-type Push = string | object | AnyArray | number;
-type Container = {
-    ID: string;
-    Tables: ContainerTable[];
-};
-type ContainerTable = {
-    ID: number;
-    Content: Push;
-};
+import { ClientOptions, Pointer, TypeResolvable, Container, ContainerTable } from '../types';
 export interface Client {
     Options: ClientOptions;
     Database: string;
     Pointers: Map<string, Pointer>;
     Containers: Map<string, Container>;
 }
-export declare class Client extends BaseClient {
+export declare class Client {
     /**
      * @typedef {Object} ClientOptions
      * @property {string=} Path
@@ -33,7 +15,7 @@ export declare class Client extends BaseClient {
      * @typedef {(object[] | string[] | number[])} AnyArray
      */
     /**
-     * @typedef {(string | object | AnyArray | number)} Push
+     * @typedef {(string | object | AnyArray | number)} TypeResolvable
      */
     /**
      * @constructor
@@ -97,7 +79,7 @@ export declare class Client extends BaseClient {
      * @description Push data to container
      * @returns {Promise<void>}
      */
-    Push<T extends Push>(Content: T, Reference: string | number, id?: number | string, Container?: string): Promise<void>;
+    Push<T extends TypeResolvable>(Content: T, Reference: string | number, id?: number | string, Container?: string): Promise<void>;
     /**
      * @public
      * @param {(string|number)} Reference - Reference to find the pointer easier
@@ -118,7 +100,7 @@ export declare class Client extends BaseClient {
      * @description Edit a key in the container
      * @returns {Promise<void>}
      */
-    Edit<T extends Push>(Reference: string | number, KeyName: number | string | null, KeyValue: T, Value: T, TableId?: number, Container?: string): Promise<void>;
+    Edit<T extends TypeResolvable>(Reference: string | number, KeyName: number | string | null, KeyValue: T, Value: T, TableId?: number, Container?: string): Promise<void>;
     /**
      * @public
      * @async
@@ -129,7 +111,7 @@ export declare class Client extends BaseClient {
      * @description Search table by a key
      * @returns {Promise<ContainerTable | undefined>}
      */
-    Find<T extends Push>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): ContainerTable | undefined;
+    Find<T extends TypeResolvable>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): ContainerTable | undefined;
     /**
      * @public
      * @async
@@ -160,7 +142,7 @@ export declare class Client extends BaseClient {
      * @description Delete Table by Key
      * @returns {Promise<void>}
      */
-    DeleteTableByKey<T extends Push>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): Promise<void>;
+    DeleteTableByKey<T extends TypeResolvable>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): Promise<void>;
     /**
      * @public
      * @async
@@ -171,6 +153,5 @@ export declare class Client extends BaseClient {
      * @description Delete Key
      * @returns {Promise<void>}
      */
-    DeleteKey<T extends Push>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): Promise<void>;
+    DeleteKey<T extends TypeResolvable>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): Promise<void>;
 }
-export {};
