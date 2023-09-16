@@ -259,26 +259,6 @@ await OpenDB.DeleteKey<string>("Pointer Reference", null, "Test1", "Container ID
 #### Note:
 - **KeyName:** If your KeyName is not an object just put null.
 ---
-> `Encrypt`
-```ts
-/**
- * @param {String | Number} Content - Content encrypt data
- * @param {number} Salt - (Optional) salt number
- * @description Encrypt string data
- * @output {key_encrypted: string, secret_key: string}
- */
-const encryptData = OpenDB.Encrypt<string | number>("Content"); // Salt: number (optional)
-```
----
-> `Decrypt`
-```ts
-/** 
- * @param {DecryptOptions} options - Options decrypt data
- * @description Decrypt string
- * @output <Crypto-JS>.lib.CipherParams
- */
-const decryptedData = OpenDB.decrypt({ EncryptKey: encryptData.key_encrypted.toString(), SecretKey: encryptData.secret_key});
-```
 
 ### :exclamation: Possible Errors:
 - (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.

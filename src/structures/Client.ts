@@ -11,7 +11,7 @@ import { uid } from 'uid';
 
 import { Emitter } from './NodeEmitter';
 
-import { ClientOptions, Pointer, Push, Container, ContainerTable } from '../types';
+import { ClientOptions, Pointer, TypeResolvable, Container, ContainerTable } from '../types';
 
 import parsePath from '../helpers/parsePath';
 
@@ -38,7 +38,7 @@ export class Client
 	 */
 	
 	/**
-	 * @typedef {(string | object | AnyArray | number)} Push
+	 * @typedef {(string | object | AnyArray | number)} TypeResolvable
 	 */
 	
 
@@ -370,7 +370,7 @@ export class Client
 	 * @description Push data to container
 	 * @returns {Promise<void>}
 	 */
-	public async Push<T extends Push>(Content: T, Reference: string | number, id?: number | string, Container?: string): Promise<void>
+	public async Push<T extends TypeResolvable>(Content: T, Reference: string | number, id?: number | string, Container?: string): Promise<void>
 	{
 		this.CheckFolders();
 
@@ -573,7 +573,7 @@ export class Client
 	 * @description Edit a key in the container
 	 * @returns {Promise<void>}
 	 */
-	public async Edit<T extends Push>(Reference: string | number, KeyName: number | string | null, KeyValue: T, Value: T, TableId?: number, Container?: string): Promise<void> 
+	public async Edit<T extends TypeResolvable>(Reference: string | number, KeyName: number | string | null, KeyValue: T, Value: T, TableId?: number, Container?: string): Promise<void> 
 	{
 		this.CheckFolders();
 
@@ -737,7 +737,7 @@ export class Client
 	 * @description Search table by a key
 	 * @returns {Promise<ContainerTable | undefined>}
 	 */
-	public Find<T extends Push>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): ContainerTable | undefined
+	public Find<T extends TypeResolvable>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): ContainerTable | undefined
 	{
 		this.CheckFolders();
 
@@ -994,7 +994,7 @@ export class Client
 	 * @description Delete Table by Key
 	 * @returns {Promise<void>}
 	 */
-	public async DeleteTableByKey<T extends Push>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): Promise<void>
+	public async DeleteTableByKey<T extends TypeResolvable>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): Promise<void>
 	{
 		this.CheckFolders();
 
@@ -1109,7 +1109,7 @@ export class Client
 	 * @description Delete Key
 	 * @returns {Promise<void>}
 	 */
-	public async DeleteKey<T extends Push>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): Promise<void>
+	public async DeleteKey<T extends TypeResolvable>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): Promise<void>
 	{
 		this.CheckFolders();
 

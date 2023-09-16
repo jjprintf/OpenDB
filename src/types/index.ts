@@ -12,7 +12,7 @@ export type Pointer = {
 
 export type AnyArray = object[] | string[] | number[];
 
-export type Push = string | object | AnyArray | number;
+export type TypeResolvable = string | object | AnyArray | number;
 
 export type Container = 
 {
@@ -23,5 +23,5 @@ export type Container =
 export type ContainerTable = 
 {
 	ID: number
-	Content: Push
+	Content: TypeResolvable
 }
