@@ -5,6 +5,7 @@ export interface Client {
     Database: string;
     Pointers: Map<string, Pointer>;
     Containers: Map<string, Container>;
+    Path: string[];
 }
 export declare class Client {
     /**

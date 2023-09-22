@@ -1,5 +1,7 @@
-export default function _parsePath(path: string): string 
+export default function _parsePath(path: string): string[]
 {
+	if (path.includes("\\"))
+		path = path.replace("\\", "/");
 	if (path.startsWith("/"))
 		path = path.slice(1);
 	if (path.endsWith("/"))
@@ -7,5 +9,5 @@ export default function _parsePath(path: string): string
 	if (path.startsWith("./") && !path.startsWith(".."))
 		path = path.slice(2);
 	
-	return path;
+	return path.split("/");
 }

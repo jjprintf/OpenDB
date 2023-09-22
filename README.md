@@ -40,7 +40,7 @@ npm i @printfdead/open.db --save
 ### :pencil: Examples:
 > `Create Database & Start Client Instance:`
 ```ts
-import { Client } from '@printfdead/open.db';
+import { Client, Emitter } from '@printfdead/open.db';
 
 /**
  * @param {object} options - Put database name and path
@@ -54,7 +54,7 @@ const OpenDB = new Client({ Path: "path/to/root/folder" });
  * @param {function} callback - Callback function
  * @description The event is emitted when the Client class is instantiated.
 */
-OpenDB.on('start', () => {
+Emitter.on('start', () => {
   console.log("OpenDB start!");
 });
 
@@ -64,7 +64,7 @@ OpenDB.on('start', () => {
  * @type {error} ErrorClient interface
  * @description The event is emitted on some conditions of the Database class.
 */
-OpenDB.on('error', (error) => {
+Emitter.on('error', (error) => {
   console.error(error);  
 });
 
@@ -125,8 +125,10 @@ await OpenDB.CreatePointer("PointerReference");
  * @description Get Pointer
  * @return BSON.Document | Undefined
  */
+import { Pointer } from '@printfdead/open.db'
 
-OpenDB.GetPointer("PointerReference");
+
+OpenDB.GetPointer("PointerReference") as Pointer;
 ```
 ---
 > `GetContainer`
@@ -136,8 +138,9 @@ OpenDB.GetPointer("PointerReference");
  * @description Get Container
  * @returns BSON.Document | Undefined
  */
+import { Container } from '@printfdead/open.db'
 
-OpenDB.GetContainer("ContainerID");
+OpenDB.GetContainer("ContainerID") as Container;
 ```
 ---
 > `Push`
@@ -195,8 +198,9 @@ await OpenDB.Edit<string>("Pointer Reference", null, "Test1", "Test2", 1, "Conta
  * @description Search table by a key
  * @returns ContainerTable | undefined
  */
+import { ContainerTable } from '@printfdead/open.db'
 
-OpenDB.Find<string>("Pointer Reference", null, "Test1", "Container ID");
+OpenDB.Find<string>("Pointer Reference", null, "Test1", "Container ID") as ContainerTable;
 ```
 #### Note:
 - **KeyName:** If your KeyName is not an object just put null.
@@ -210,8 +214,9 @@ OpenDB.Find<string>("Pointer Reference", null, "Test1", "Container ID");
  * @description Get table by a table id
  * @returns ContainerTable | undefined
  */
+import { ContainerTable } from '@printfdead/open.db'
 
-OpenDB.Get("Pointer Reference", 1, "Container ID");
+OpenDB.Get("Pointer Reference", 1, "Container ID") as ContainerTable;
 ```
 ---
 > `DeleteTable`
@@ -259,6 +264,9 @@ await OpenDB.DeleteKey<string>("Pointer Reference", null, "Test1", "Container ID
 #### Note:
 - **KeyName:** If your KeyName is not an object just put null.
 ---
+# :exclamation: Important error:
+> If you have this error **(ODB-01) The path you specified was not found.** when running your database and you believe that the path is set correctly, start your path only by entering the name of the folder ( Example: "src/").
+> This error can be given since the main path for an unknown reason is interpreted as the root of the project, if you want to put the database outside of the src, for example, you can put "src/..", I hope it is useful to solve this problem , we don't know what the root of it is.
 
 ### :exclamation: Possible Errors:
 - (ODB-01) **The path you specified was not found.** This error is due to the specified path not being found or misplaced.
