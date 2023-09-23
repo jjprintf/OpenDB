@@ -85,6 +85,9 @@ export class Client
 
 		if (!fs.existsSync(path.join(this.Options.Path, 'OpenDB')))
 			throw new Error("(ODB-02) The database root folder not exists.");
+		
+		if (this.Database === "none") 
+			throw new Error("(ODB-10) The database is not configured.");
 
 		if (!fs.existsSync(path.join(this.Options.Path, 'OpenDB', this.Database)))
 			throw new Error("(ODB-03) This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.");
@@ -269,9 +272,6 @@ export class Client
 		
 		if (typeof this.Options.Path === "undefined")
 			throw new Error("An error occurred and the path was not specified.");
-		
-		if (this.Database === "none") 
-			throw new Error("(ODB-10) The database is not configured.");
 
 		if (this.GetPointer(Reference) !== undefined)
 		{
@@ -321,9 +321,6 @@ export class Client
 		
 		if (typeof this.Options.Path === "undefined")
 			throw new Error("An error occurred and the path was not specified.");
-		
-		if (this.Database === "none") 
-			throw new Error("(ODB-10) The database is not configured.");
 
 		let _pointer = undefined;
 
@@ -365,9 +362,6 @@ export class Client
 		if (typeof this.Options.Path === "undefined")
 			throw new Error("An error occurred and the path was not specified.");
 		
-		if (this.Database === "none") 
-			throw new Error("(ODB-10) The database is not configured.");
-		
 		if (!this.Containers.get(Container))
 		{
 			let _container = undefined;
@@ -408,9 +402,6 @@ export class Client
 
 		if (typeof this.Options.Path === "undefined")
 			throw new Error("An error occurred and the path was not specified.");
-		
-		if (this.Database === "none") 
-			throw new Error("(ODB-10) The database is not configured.");
 		
 		const pointer = this.GetPointer(Reference);
 
@@ -551,9 +542,6 @@ export class Client
 		if (typeof this.Options.Path === "undefined")
 			throw new Error("An error occurred and the path was not specified.");
 		
-		if (this.Database === "none") 
-			throw new Error("(ODB-10) The database is not configured.");
-		
 		const Pointer = this.GetPointer(Reference);
 		const containers = [];
 
@@ -623,9 +611,6 @@ export class Client
 		
 		if (typeof this.Options.Path === "undefined")
 			throw new Error("An error occurred and the path was not specified.");
-		
-		if (this.Database === "none") 
-			throw new Error("(ODB-10) The database is not configured.");
 
 		const _pointer = this.GetPointer(Reference);
 	
@@ -796,9 +781,6 @@ export class Client
 		
 		if (typeof this.Options.Path === "undefined")
 			throw new Error("An error occurred and the path was not specified.");
-		
-		if (this.Database === "none") 
-			throw new Error("(ODB-10) The database is not configured.");
 
 		const _pointer = this.GetPointer(Reference);
 	
@@ -896,9 +878,6 @@ export class Client
 		
 		if (typeof this.Options.Path === "undefined")
 			throw new Error("An error occurred and the path was not specified.");
-		
-		if (this.Database === "none") 
-			throw new Error("(ODB-10) The database is not configured.");
 
 		const _pointer = this.GetPointer(Reference);
 	
@@ -974,9 +953,6 @@ export class Client
 		
 		if (typeof this.Options.Path === "undefined")
 			throw new Error("An error occurred and the path was not specified.");
-		
-		if (this.Database === "none") 
-			throw new Error("(ODB-10) The database is not configured.");
 
 		const pointer = this.GetPointer(Reference);
 
@@ -1071,9 +1047,6 @@ export class Client
 		
 		if (typeof this.Options.Path === "undefined")
 			throw new Error("An error occurred and the path was not specified.");
-		
-		if (this.Database === "none") 
-			throw new Error("(ODB-10) The database is not configured.");
 
 		const pointer = this.GetPointer(Reference);
 
@@ -1192,9 +1165,6 @@ export class Client
 		
 		if (typeof this.Options.Path === "undefined")
 			throw new Error("An error occurred and the path was not specified.");
-		
-		if (this.Database === "none") 
-			throw new Error("(ODB-10) The database is not configured.");
 
 		const pointer = this.GetPointer(Reference);
 
