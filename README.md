@@ -278,6 +278,7 @@ await OpenDB.DeleteKey<string>("Pointer Reference", null, "Test1", "Container ID
 - (ODB-07) **The id is already in use.** This happens when the table id is already in use.
 - (ODB-08) **Key not found.** This happens when the key was not found.
 - (ODB-09) **This ID is not correct.** This error is because the container id is not correct.
+- (ODB-10) **The database is not configured.** This is because the database is not configured, use the 'SetDatabase()' function to configure the database.
 - (ODB-99) **An error occurred and the path was not specified.** This error can occured because the path could not be defined automatically or for other internal reasons.
 
 ### :interrobang: Possible Warns:
