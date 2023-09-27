@@ -105,8 +105,7 @@ await OpenDB.CreateDatabase("DatabaseName");
 ```ts
 /**
  * @param {string} Name - Database name
- * @param {boolean} Force - (optional) Force change
- * @param {boolean} NotLoad - (optional) Don't preload pointers and containers, defaults to false.
+ * @param {BSON.DeserializeOptions} deserializeOptions (optional) - Deserialize Options
  * @description Select the database
  * @return this
  */
@@ -142,6 +141,7 @@ OpenDB.GetPointer("PointerReference") as Pointer;
 ```ts
 /**
  * @param {string} Container - Container ID
+ * @param {BSON.DeserializeOptions} deserializeOptions (optional) - Deserialize Options
  * @description Get Container
  * @returns BSON.Document | Undefined
  */
