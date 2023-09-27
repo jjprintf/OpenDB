@@ -12,7 +12,7 @@
 ## Information:
 - :wrench: Efficient and fast database using BSON.
 - :butterfly: Simple and easy to use
-- :smile: Version 1.3
+- :smile: Version 1.4
 - :globe_with_meridians: More than 10,000 tables per container, using a Buffer of 10240 bytes!
 
 ### :wrench: Installation
