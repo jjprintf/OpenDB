@@ -14,15 +14,24 @@ describe("Test database", () =>
 		expect(await OpenDB.CreatePointer("TestPointer")).toBe(undefined);
 		const pointer = OpenDB.GetPointer("TestPointer") as Pointer;
 
-		for(let i = 0; i<5000; i++) {
-			let names = ["Printf", "Leerot", "Nacho"];
+		await OpenDB.Add({ name: "Printf" }, "TestPointer");
+		await OpenDB.Add({ name: "Nacho" }, "TestPointer");
+		await OpenDB.Add({ name: "Simon" }, "TestPointer");
 
-			await OpenDB.Push({ name: names[Math.floor(Math.random() * names.length)] }, "TestPointer");
-		}
+		const table: any = OpenDB.Find("TestPointer", (x: any) => x?.Content["name"] === "Printf");
 
-		const container = OpenDB.GetContainer(pointer.Containers[0]);
+		if(!table) return;
+
+		table.Content["name"] = "Nacho"
+
+		await table.save();
+
+		OpenDB.Update();
+
+		console.log(table);
+
+		const container = OpenDB.Filter("TestPointer", (x) => x?.ID);
 
 		console.log(container);
-
 	}, 500000);
 });

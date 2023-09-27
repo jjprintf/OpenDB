@@ -13,6 +13,8 @@ import { Emitter } from './NodeEmitter';
 
 import { ClientOptions, Pointer, TypeResolvable, Container, ContainerTable, PredicateType } from '../types';
 
+import Table from './Table';
+
 import parsePath from '../helpers/parsePath';
 
 import parseSrc from '../helpers/parseSrc';
@@ -101,6 +103,48 @@ export class Client
 
 		if (!fs.existsSync(path.join(this.Options.Path, 'OpenDB', this.Database)))
 			throw new Error("(ODB-03) This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.");
+	}
+
+	/**
+	 * @public
+	 * @param {BSON.DeserializeOptions} [deserializeOptions=] - Deserialize Options
+	 * @description Update cache after a change in the container, without the change having been made in the cache.
+	 * @returns void
+	 */
+	public Update(deserializeOptions?: BSON.DeserializeOptions): void {
+		this.CheckFolders();
+
+		if (typeof this.Options.Path === "undefined")
+			throw new Error("An error occurred and the path was not specified.");
+
+		if (!deserializeOptions) 
+			deserializeOptions = { allowObjectSmallerThanBufferSize: true };
+		else {
+			if (!Object.keys(deserializeOptions).includes("allowObjectSmallerThanBufferSize") || deserializeOptions.allowObjectSmallerThanBufferSize === false) {
+				deserializeOptions.allowObjectSmallerThanBufferSize = true;
+			}
+		}
+
+		for (const file of fs.readdirSync(path.join(this.Options.Path, 'OpenDB', this.Database, 'Containers'), { recursive: true }))
+		{
+			const _file = fs.readFileSync(path.join(this.Options.Path, 'OpenDB', this.Database, 'Containers', file as string));
+
+			let Document: Container[] = [];
+
+			BSON.deserializeStream(_file, 0, 1, Document, 0, deserializeOptions);
+				
+			Document.forEach((container) => {
+				if (!container.ID || !container.Tables) return;
+
+				const _container: Container = {
+					ID: container.ID,
+					Tables: container.Tables
+				}
+
+				this.Containers.clear();
+				this.Containers.set(container.ID, _container);
+			});
+		}
 	}
 
 	/**
@@ -408,7 +452,7 @@ export class Client
 	 * @description Push data to container
 	 * @returns {Promise<void>}
 	 */
-	public async Push<T extends TypeResolvable>(Content: T, Reference: string | number, id?: number | string, Container?: string): Promise<void>
+	public async Add<T extends TypeResolvable>(Content: T, Reference: string | number, id?: number | string, Container?: string): Promise<void>
 	{
 		this.CheckFolders();
 
@@ -576,187 +620,20 @@ export class Client
 				if (error) Emitter.emit("error", error);
 			});
 	}
-	
-	/**
-	 * @public
-	 * @async
-	 * @param {(string|number)} Reference - Reference to find the pointer easier
-	 * @param {(number|string|null)} KeyName - Key name to search the container
-	 * @param {TypeResolvable} KeyValue - Key value to search the container
-	 * @param {TypeResolvable} Value - Value to define
-	 * @param {number} [TableId=false] - Table ID
-	 * @param {string} [Container=false] - Container ID
-	 * @description Edit a key in the container
-	 * @returns {Promise<void>}
-	 */
-	public async Edit<T extends TypeResolvable>(Reference: string | number, KeyName: number | string | null, KeyValue: T, Value: T, TableId?: number, Container?: string): Promise<void> 
-	{
-		this.CheckFolders();
-		
-		if (typeof this.Options.Path === "undefined")
-			throw new Error("An error occurred and the path was not specified.");
-
-		const _pointer = this.GetPointer(Reference);
-	
-		if (typeof _pointer === "undefined" || !_pointer)
-			throw new Error("(ODB-05) Pointer not found");
-		
-		if (typeof Container === "string")
-		{
-			if (Container.length !== 18)
-				throw new Error("(ODB-09) This ID is not correct");
-			
-			const _container = this.GetContainer(Container);
-			let found = false;
-	
-			if (!_container)
-				throw new Error("(ODB-09) This ID is not correct");
-			
-			_container.Tables.forEach((x: any, i: number) =>
-			{
-				if (typeof TableId === "number") 
-				{
-					if (x.ID === TableId) 
-					{
-						if (typeof x.Content === "string" || Array.isArray(x.Content) || typeof x.Content === "number" && KeyName === null) 
-						{
-							if (x.Content === KeyValue)
-							{
-								found = true;
-								x.Content = Value;
-							}
-						} 
-						else if (typeof x.Content === "object" && KeyName != null) 
-						{
-							if (x.Content[KeyName] === KeyValue)
-							{
-								found = true;
-								x.Content[KeyName] = Value;
-							}
-						}
-					}
-				} 
-				else 
-				{
-					if (typeof x.Content === "string" || Array.isArray(x.Content) || typeof x.Content === "number" && KeyName === null) 
-					{
-						if (x.Content === KeyValue)
-						{
-							found = true;
-							x.Content = Value;
-						}
-					} 
-					else if (typeof x.Content === "object" && KeyName != null) 
-					{
-						if (x.Content[KeyName] === KeyValue)
-						{
-							found = true;
-							x.Content[KeyName] = Value;
-						}
-					}
-				}
-			});
-			
-			if (!found)
-				throw new Error("(ODB-08) Key not found");
-
-			let container = {
-				ID: _container.ID,
-				Tables: _container.Tables
-			};
-
-			this.Containers.set(container.ID, container);
-
-			await fs.promises.writeFile(path.join(this.Options.Path, 'OpenDB', this.Database, 'Containers', container.ID+'.bson'), BSON.serialize(container))
-				.catch((error) =>
-				{
-					if (error) Emitter.emit("error", error);
-				});
-		}
-		else 
-		{
-			_pointer.Containers.forEach(async (x: any) => {
-				if (typeof this.Options.Path === "undefined")
-					throw new Error("An error occurred and the path was not specified.");
-				
-				const _container = this.GetContainer(x);
-				let found = false;
-	
-				if (!_container)
-					throw new Error("This ID is not correct");
-				
-				_container.Tables.forEach((x: any, i: number) =>
-				{
-					if (typeof TableId === "number") 
-					{
-						if (x.ID === TableId) 
-						{
-							if (typeof x.Content === "string" || Array.isArray(x.Content) || typeof x.Content === "number" && KeyName === null) 
-							{
-								if (x.Content === KeyValue)
-								{
-									found = true;
-									x.Content = Value;
-								}
-							} 
-							else if (typeof x.Content === "object" && KeyName != null) 
-							{
-								if (x.Content[KeyName] === KeyValue)
-								{
-									found = true;
-									x.Content[KeyName] = Value;
-								}
-							}
-						}
-					} 
-					else 
-					{
-						if (typeof x.Content === "string" || Array.isArray(x.Content) || typeof x.Content === "number" && KeyName === null) 
-						{
-							if (x.Content === KeyValue)
-							{
-								found = true;
-								x.Content = Value;
-							}
-						} 
-						else if (typeof x.Content === "object" && KeyName != null) 
-						{
-							if (x.Content[KeyName] === KeyValue)
-							{
-								found = true;
-								x.Content[KeyName] = Value;
-							}
-						}
-					}
-				});
-				
-				if (!found)
-					throw new Error("(ODB-08) Key not found");
-
-				let container = {
-					ID: _container.ID,
-					Tables: _container.Tables
-				};
-
-				this.Containers.set(container.ID, container);
-
-				await fs.promises.writeFile(path.join(this.Options.Path, 'OpenDB', this.Database, 'Containers', container.ID+'.bson'), BSON.serialize(container))
-					.catch((error) =>
-					{
-						if (error) Emitter.emit("error", error);
-					});
-			});
-		}		
-	}
 
 	/**
 	 * @public
 	 * @param {(string|number)} Reference - Reference to find the pointer easier
 	 * @param {PredicateType<T>} predicate - Predicate to find data
 	 * @param {string} [Container=false] - Container ID
-	 * @returns {(ContainerTable | undefined)}
+	 * @returns {(Table | undefined)}
 	 */
-	public FindByPredicate(Reference: string | number, predicate: PredicateType<ContainerTable>, Container?: string): ContainerTable | undefined {
+	public Find(Reference: string | number, predicate: PredicateType<ContainerTable>, Container?: string): Table | undefined {
+		this.CheckFolders();
+
+		if (typeof this.Options.Path === "undefined")
+			throw new Error("An error occurred and the path was not specified.");
+		
 		const pointer = this.GetPointer(Reference) as Pointer;
 
 		if (!pointer)
@@ -768,14 +645,22 @@ export class Client
 			if (!container) 
 				throw new Error("(ODB-06) Container not found");
 
-			return container.Tables.find(predicate);
+			const _container = container.Tables.find(predicate);
+
+			if (!_container) return undefined;
+
+			return new Table(_container.ID, _container.Content, this.Options.Path, this.Database, container);
 		} else {
 			const container = this.GetContainer(Container) as Container;
 
 			if (!container) 
 				throw new Error("(ODB-06) Container not found");
 
-			return container.Tables.find(predicate);
+			const _container = container.Tables.find(predicate);
+
+			if (!_container) return undefined;
+	
+			return new Table(_container.ID, _container.Content, this.Options.Path, this.Database, container);
 		}
 	}
 
@@ -806,179 +691,6 @@ export class Client
 				throw new Error("(ODB-06) Container not found");
 
 			return container.Tables.filter(predicate);
-		}
-	}
-	
-	/**
-	 * @public
-	 * @async
-	 * @param {(string|number)} Reference - Reference to find the pointer easier
-	 * @param {(string | number | null)} KeyName - Key name to search the container
-	 * @param {TypeResolvable} KeyValue - Key value to search the container
-	 * @param {string} [Container=false] - Container ID
-	 * @description Search table by a key
-	 * @returns {(ContainerTable | undefined)}
-	 */
-	public Find<T extends TypeResolvable>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): ContainerTable | undefined
-	{
-		this.CheckFolders();
-		
-		if (typeof this.Options.Path === "undefined")
-			throw new Error("An error occurred and the path was not specified.");
-
-		const _pointer = this.GetPointer(Reference);
-	
-		if (typeof _pointer === "undefined" || !_pointer)
-			throw new Error("(ODB-05) Pointer not found");
-		
-		if (typeof Container === "string")
-		{
-			if (Container.length !== 18)
-				throw new Error("(ODB-09) This ID is not correct");
-			
-			const _container = this.GetContainer(Container);
-			let found = false;
-			let table: ContainerTable | undefined;
-	
-			if (!_container)
-				throw new Error("(ODB-09) This ID is not correct");
-			
-			_container.Tables.forEach((x: any, i: number) =>
-			{
-				if (typeof x.Content === "string" || Array.isArray(x.Content) || typeof x.Content === "number" && KeyName === null) 
-				{
-					if (x.Content === KeyValue)
-					{
-						found = true;
-						table = x;
-					}
-				} 
-				else if (typeof x.Content === "object" && KeyName != null) 
-				{
-					if (x.Content[KeyName] === KeyValue)
-					{
-						found = true;
-						table = x;
-					}
-				}
-			});
-			
-			if (!found || !table)
-				throw new Error("(ODB-08) Key not found");
-			
-			return table;
-		}
-		else 
-		{
-			let table: ContainerTable | undefined;
-			
-			_pointer.Containers.forEach(async (x: any) => {
-				const _container = this.GetContainer(x);
-				let found = false;
-	
-				if (!_container)
-					throw new Error("This ID is not correct");
-				
-				_container.Tables.forEach((x: any, i: number) =>
-				{
-					if (typeof x.Content === "string" || Array.isArray(x.Content) || typeof x.Content === "number" && KeyName === null) 
-					{
-						if (x.Content === KeyValue)
-						{
-							found = true;
-							table = x;
-						}
-					} 
-					else if (typeof x.Content === "object" && KeyName != null) 
-					{
-						if (x.Content[KeyName] === KeyValue)
-						{
-							found = true;
-							table = x;
-						}
-					}
-				});
-				
-				if (!found || !table)
-					throw new Error("(ODB-08) Key not found");
-			});
-			
-			return table;
-		}
-	}
-	
-	/**
-	 * @public
-	 * @async
-	 * @param {(string|number)} Reference - Reference to find the pointer easier
-	 * * @param {number} TableId - TableId ID
-	 * @param {string} [Container=false] - Container ID
-	 * @description Get table by a table id
-	 * @returns {(ContainerTable | undefined)}
-	 */
-	public Get(Reference: string | number, TableId: number, Container?: string): ContainerTable | undefined
-	{
-		this.CheckFolders();
-		
-		if (typeof this.Options.Path === "undefined")
-			throw new Error("An error occurred and the path was not specified.");
-
-		const _pointer = this.GetPointer(Reference);
-	
-		if (typeof _pointer === "undefined" || !_pointer)
-			throw new Error("(ODB-05) Pointer not found");
-		
-		if (typeof Container === "string")
-		{
-			if (Container.length !== 18)
-				throw new Error("(ODB-09) This ID is not correct");
-			
-			const _container = this.GetContainer(Container);
-			let found = false;
-			let table: ContainerTable | undefined;
-	
-			if (!_container)
-				throw new Error("(ODB-09) This ID is not correct");
-			
-			_container.Tables.forEach((x: any, i: number) =>
-			{
-				if (x.ID === TableId) 
-				{
-					found = true;
-					table = x;
-				}
-			});
-			
-			if (!found || !table)
-				throw new Error("(ODB-08) Key not found");
-
-			return table;
-		}
-		else 
-		{
-			let table: ContainerTable | undefined;
-			
-			_pointer.Containers.forEach(async (x: any) => {
-				const _container = this.GetContainer(x);
-				let found = false;
-	
-				if (!_container)
-					throw new Error("This ID is not correct");
-				
-				_container.Tables.forEach((x: any, i: number) =>
-				{
-					if (x.ID === TableId) 
-					{
-						found = true;
-						table = x;
-					}
-				});
-				
-				if (!found || !table)
-					throw new Error("(ODB-08) Key not found");
-			});
-			
-			return table;
 		}
 	}
 

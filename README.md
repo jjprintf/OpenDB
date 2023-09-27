@@ -60,7 +60,7 @@ const OpenDB = new Client({ Path: "path/to/root/folder", Buffer: 512 });
  * @param {function} callback - Callback function
  * @description The event is emitted when the Client class is instantiated.
 */
-Emitter.on('start', () => {
+Emitter.once('start', () => {
   console.log("OpenDB start!");
 });
 
@@ -150,7 +150,19 @@ import { Container } from '@printfdead/open.db'
 OpenDB.GetContainer("ContainerID") as Container;
 ```
 ---
-> `Push`
+> `Update`
+```ts
+/**
+ * @public
+ * @param {BSON.DeserializeOptions} [deserializeOptions=] - Deserialize Options
+ * @description Update cache after a change in the container, without the change having been made in the cache.
+ * @returns void
+ */
+
+OpenDB.Update();
+```
+---
+> `Add`
 ```ts
 /**
  * @param {String | Number | Object | Array} Content - Content push
@@ -162,7 +174,7 @@ OpenDB.GetContainer("ContainerID") as Container;
  * @return Promise<this>
  */
 
-await OpenDB.Push<string>("This content can be object, string, number and array", "Pointer Reference", 1, "Container ID");
+await OpenDB.Add<string>("This content can be object, string, number and array", "Pointer Reference", 1, "Container ID");
 ```
 ---
 > `AddContainer`
@@ -177,52 +189,24 @@ await OpenDB.Push<string>("This content can be object, string, number and array"
 await OpenDB.AddContainer("Pointer reference", "Container ID");
 ```
 ---
-> `Edit`
-```ts
-/**
- * @param {Reference} Reference - Reference to find the pointer easier
- * @param {number | string | null} KeyName - Key name to search the container
- * @param {Push} KeyValue - Key value to search the container
- * @param {Push} Value - Value to define
- * @param {number} TableId (optional) - Table ID
- * @param {string} Container (optional) - Container ID
- * @description Edit a key in the container
- * @returns Promise<void>
- */
-
-await OpenDB.Edit<string>("Pointer Reference", null, "Test1", "Test2", 1, "Container ID");
-```
-#### Note:
-- **KeyName:** If your KeyName is not an object just put null.
----
 > `Find`
-```ts
-/**
- * @param {(string|number)} Reference - Reference to find the pointer easier
- * @param {string | number | null} KeyName - Key name to search the container
- * @param {Push} KeyValue - Key value to search the container
- * @param {string} Container (optional) - Container ID
- * @description Search table by a key
- * @returns ContainerTable | undefined
- */
-import { ContainerTable } from '@printfdead/open.db'
-
-OpenDB.Find<string>("Pointer Reference", null, "Test1", "Container ID") as ContainerTable;
-```
-#### Note:
-- **KeyName:** If your KeyName is not an object just put null.
----
-> `FindByPredicate`
 ```ts
 /**
  * @param {(string|number)} Reference - Reference to find the pointer easier
  * @param {PredicateType<T>} predicate - Predicate to find data
  * @param {string} [Container=false] - Container ID
- * @returns ContainerTable | undefined
+ * @returns {(Table | undefined)}
  */
 import { ContainerTable } from '@printfdead/open.db'
 
-OpenDB.FindByPredicate("Pointer Reference", (value: ContainerTable, index: number) => value.Content === "Hello World!", "Container ID") as ContainerTable;
+const table = OpenDB.Find("Pointer Reference", (value: ContainerTable, index: number) => value.Content === "Hello World!", "Container ID") as ContainerTable;
+
+// Example edit data
+table.Content = "Hello World!";
+table.save();
+
+OpenDB.Update();
+
 ```
 ---
 > `Filter`
@@ -237,20 +221,6 @@ OpenDB.FindByPredicate("Pointer Reference", (value: ContainerTable, index: numbe
 import { ContainerTable } from '@printfdead/open.db'
 
 OpenDB.Filter("Pointer Reference", (value: ContainerTable, index: number) => value.Content === "Hello World!", "Container ID") as ContainerTable[];
-```
----
-> `Get`
-```ts
-/**
- * @param {(string|number)} Reference - Reference to find the pointer easier
- * @param {number} TableId - TableId ID
- * @param {string} Container (optional) - Container ID
- * @description Get table by a table id
- * @returns ContainerTable | undefined
- */
-import { ContainerTable } from '@printfdead/open.db'
-
-OpenDB.Get("Pointer Reference", 1, "Container ID") as ContainerTable;
 ```
 ---
 > `DeleteTable`

@@ -1,6 +1,6 @@
 {
   "name": "@printfdead/open.db",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "Fast efficient database, uses BSON",
   "main": "dist/index.js",
   "types": "./typings/index.d.ts",
@@ -13,7 +13,7 @@
     "docs": "jsdoc -c jsdoc.json"
   },
   "author": "PrintfDead",
-  "license": "GNU GPL3",
+  "license": "MIT",
   "keywords": [
     "javascript",
     "database",

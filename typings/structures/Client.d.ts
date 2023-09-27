@@ -1,5 +1,6 @@
 import { BSON } from 'bson';
 import { ClientOptions, Pointer, TypeResolvable, Container, ContainerTable, PredicateType } from '../types';
+import Table from './Table';
 export interface Client {
     Options: ClientOptions;
     Database: string;
@@ -30,6 +31,13 @@ export declare class Client {
      */
     constructor(Options: ClientOptions);
     private CheckFolders;
+    /**
+     * @public
+     * @param {BSON.DeserializeOptions} [deserializeOptions=] - Deserialize Options
+     * @description Update cache after a change in the container, without the change having been made in the cache.
+     * @returns void
+     */
+    Update(deserializeOptions?: BSON.DeserializeOptions): void;
     /**
      * @public
      * @async
@@ -86,7 +94,7 @@ export declare class Client {
      * @description Push data to container
      * @returns {Promise<void>}
      */
-    Push<T extends TypeResolvable>(Content: T, Reference: string | number, id?: number | string, Container?: string): Promise<void>;
+    Add<T extends TypeResolvable>(Content: T, Reference: string | number, id?: number | string, Container?: string): Promise<void>;
     /**
      * @public
      * @param {(string|number)} Reference - Reference to find the pointer easier
@@ -97,25 +105,12 @@ export declare class Client {
     AddContainer(Reference: string | number, Container?: string | null): Promise<void>;
     /**
      * @public
-     * @async
-     * @param {(string|number)} Reference - Reference to find the pointer easier
-     * @param {(number|string|null)} KeyName - Key name to search the container
-     * @param {TypeResolvable} KeyValue - Key value to search the container
-     * @param {TypeResolvable} Value - Value to define
-     * @param {number} [TableId=false] - Table ID
-     * @param {string} [Container=false] - Container ID
-     * @description Edit a key in the container
-     * @returns {Promise<void>}
-     */
-    Edit<T extends TypeResolvable>(Reference: string | number, KeyName: number | string | null, KeyValue: T, Value: T, TableId?: number, Container?: string): Promise<void>;
-    /**
-     * @public
      * @param {(string|number)} Reference - Reference to find the pointer easier
      * @param {PredicateType<T>} predicate - Predicate to find data
      * @param {string} [Container=false] - Container ID
-     * @returns {(ContainerTable | undefined)}
+     * @returns {(Table | undefined)}
      */
-    FindByPredicate(Reference: string | number, predicate: PredicateType<ContainerTable>, Container?: string): ContainerTable | undefined;
+    Find(Reference: string | number, predicate: PredicateType<ContainerTable>, Container?: string): Table | undefined;
     /**
      * @public
      * @param {(string|number)} Reference - Reference to find the pointer easier
@@ -124,27 +119,6 @@ export declare class Client {
      * @returns {(ContainerTable[] | undefined)}
      */
     Filter(Reference: string | number, predicate: PredicateType<ContainerTable>, Container?: string): ContainerTable[] | undefined;
-    /**
-     * @public
-     * @async
-     * @param {(string|number)} Reference - Reference to find the pointer easier
-     * @param {(string | number | null)} KeyName - Key name to search the container
-     * @param {TypeResolvable} KeyValue - Key value to search the container
-     * @param {string} [Container=false] - Container ID
-     * @description Search table by a key
-     * @returns {(ContainerTable | undefined)}
-     */
-    Find<T extends TypeResolvable>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): ContainerTable | undefined;
-    /**
-     * @public
-     * @async
-     * @param {(string|number)} Reference - Reference to find the pointer easier
-     * * @param {number} TableId - TableId ID
-     * @param {string} [Container=false] - Container ID
-     * @description Get table by a table id
-     * @returns {(ContainerTable | undefined)}
-     */
-    Get(Reference: string | number, TableId: number, Container?: string): ContainerTable | undefined;
     /**
      * @public
      * @async
