@@ -15,7 +15,7 @@ export type Container = {
     Tables: ContainerTable[];
 };
 export type ContainerTable = {
-    ID: number;
+    ID: number | string;
     Content: TypeResolvable;
 };
 export type PredicateType<T> = (value?: T, index?: number, array?: T[]) => unknown;

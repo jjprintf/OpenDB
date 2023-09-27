@@ -23,7 +23,7 @@ export type Container =
 
 export type ContainerTable = 
 {
-	ID: number
+	ID: number | string,
 	Content: TypeResolvable
 }
 

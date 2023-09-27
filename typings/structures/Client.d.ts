@@ -79,7 +79,7 @@ export declare class Client {
     /**
      * @public
      * @async
-     * @param {Push} Content - Push content
+     * @param {TypeResolvable} Content - Push content
      * @param {(string|number)} Reference - Reference to find the pointer easier
      * @param {(number|string)} id - Table ID
      * @param {string} [Container=false] - Container ID
@@ -100,8 +100,8 @@ export declare class Client {
      * @async
      * @param {(string|number)} Reference - Reference to find the pointer easier
      * @param {(number|string|null)} KeyName - Key name to search the container
-     * @param {Push} KeyValue - Key value to search the container
-     * @param {Push} Value - Value to define
+     * @param {TypeResolvable} KeyValue - Key value to search the container
+     * @param {TypeResolvable} Value - Value to define
      * @param {number} [TableId=false] - Table ID
      * @param {string} [Container=false] - Container ID
      * @description Edit a key in the container
@@ -129,7 +129,7 @@ export declare class Client {
      * @async
      * @param {(string|number)} Reference - Reference to find the pointer easier
      * @param {(string | number | null)} KeyName - Key name to search the container
-     * @param {Push} KeyValue - Key value to search the container
+     * @param {TypeResolvable} KeyValue - Key value to search the container
      * @param {string} [Container=false] - Container ID
      * @description Search table by a key
      * @returns {(ContainerTable | undefined)}
@@ -160,7 +160,7 @@ export declare class Client {
      * @async
      * @param {(string|number)} Reference - Reference to find the pointer easier
      * @param {(string | number | null)} KeyName - Key name to search the container
-     * @param {Push} KeyValue - Key value to search the container
+     * @param {TypeResolvable} KeyValue - Key value to search the container
      * @param {string} [Container=false] - Container ID
      * @description Delete Table by Key
      * @returns {Promise<void>}
@@ -171,7 +171,7 @@ export declare class Client {
      * @async
      * @param {(string|number)} Reference - Reference to find the pointer easier
      * @param {(number|string|null)} KeyName - Key name to search the container
-     * @param {Push} KeyValue - Key value to search the container
+     * @param {TypeResolvable} KeyValue - Key value to search the container
      * @param {string} [Container=false] - Container ID
      * @description Delete Key
      * @returns {Promise<void>}
