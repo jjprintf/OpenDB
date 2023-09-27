@@ -43,6 +43,11 @@ yarn add @printfdead/open.db
 
 > The errors and/or warnings shown in this documentation are errors/warns that can occur when running `OpenDB`, they are only informative, a solution can be reached by reading the description of each error/warn.
 
+> Remember to use awaits, otherwise it may give errors like **BSON Error: bson size must be >= 5, is 0** which happens when saving the empty pointer/container in the file.
+
+### :robot: Project Example:
+- [Pinguino](https://github.com/PrintfDead/Pinguino)
+
 ### :pencil: Examples:
 > `Create Database & Start Client Instance:`
 ```ts
@@ -203,7 +208,7 @@ const table = OpenDB.Find("Pointer Reference", (value: ContainerTable, index: nu
 
 // Example edit data
 table.Content = "Hello World!";
-table.save();
+await table.save();
 
 OpenDB.Update();
 

@@ -5,11 +5,11 @@ import BSON from 'bson';
 import { Emitter } from "./NodeEmitter";
 
 export default class Table {
-    public ID: string | number;
+    public readonly ID: string | number;
     public Content: TypeResolvable;
-    protected Path: string;
-    protected Database: string;
-    protected Container: Container
+    private Path: string;
+    private Database: string;
+    private Container: Container
 
     /**
      * @constructor
@@ -34,11 +34,25 @@ export default class Table {
      * @returns void
      */
     public async save(): Promise<void> {
+        if (!fs.existsSync(this.Path))
+			throw new Error("(ODB-01) The path you specified was not found.");
+
+		if (!fs.existsSync(path.join(this.Path, 'OpenDB')))
+			throw new Error("(ODB-02) The database root folder not exists.");
+		
+		if (this.Database === "none") 
+			throw new Error("(ODB-10) The database is not configured.");
+
+		if (!fs.existsSync(path.join(this.Path, 'OpenDB', this.Database)))
+			throw new Error("(ODB-03) This database does not exist, read https://github.com/PrintfDead/OpenDB#readme to know how to fix this error.");
+
         this.Container.Tables.forEach((x) => {
             if (x.ID === this.ID) {
                 x.Content = this.Content;
             }
         });
+
+        console.log(this.Container);
 
         await fs.promises.writeFile(path.join(this.Path, 'OpenDB', this.Database, 'Containers', this.Container.ID+'.bson'), BSON.serialize(this.Container))
 				.catch((error) =>

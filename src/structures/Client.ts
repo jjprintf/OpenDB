@@ -267,6 +267,7 @@ export class Client
 		for (const file of fs.readdirSync(path.join(this.Options.Path, 'OpenDB', Name, 'Pointers'), { recursive: true }))
 		{
 			const pointerFile = fs.readFileSync(path.join(this.Options.Path, 'OpenDB', Name, 'Pointers', file as string));
+			
 			const pointer = BSON.deserialize(pointerFile);
 
 			const pointerDoc: Pointer = {

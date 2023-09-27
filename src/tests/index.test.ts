@@ -14,15 +14,15 @@ describe("Test database", () =>
 		expect(await OpenDB.CreatePointer("TestPointer")).toBe(undefined);
 		const pointer = OpenDB.GetPointer("TestPointer") as Pointer;
 
-		await OpenDB.Add({ name: "Printf" }, "TestPointer");
-		await OpenDB.Add({ name: "Nacho" }, "TestPointer");
-		await OpenDB.Add({ name: "Simon" }, "TestPointer");
+		await OpenDB.Add({ name: "Printf", level: 0 }, "TestPointer");
+		await OpenDB.Add({ name: "Nacho", level: 0 }, "TestPointer");
+		await OpenDB.Add({ name: "Simon", level: 0 }, "TestPointer");
 
-		const table: any = OpenDB.Find("TestPointer", (x: any) => x?.Content["name"] === "Printf");
+		const table: any = OpenDB.Find("TestPointer", (x: any) => x?.Content["name"] === "Nacho");
 
 		if(!table) return;
 
-		table.Content["name"] = "Nacho"
+		table.Content["level"] += 1;
 
 		await table.save();
 
