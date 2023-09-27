@@ -1,5 +1,5 @@
-import BSON from 'bson';
-import { ClientOptions, Pointer, TypeResolvable, Container, ContainerTable } from '../types';
+import { BSON } from 'bson';
+import { ClientOptions, Pointer, TypeResolvable, Container, ContainerTable, PredicateType } from '../types';
 export interface Client {
     Options: ClientOptions;
     Database: string;
@@ -11,6 +11,12 @@ export declare class Client {
     /**
      * @typedef {Object} ClientOptions
      * @property {string=} Path
+     */
+    /**
+     * @typedef {function} PredicateType<T>
+     * @param {T} [value=]
+     * @param {number} [index=]
+     * @param {T[]} [array=]
      */
     /**
      * @typedef {(object[] | string[] | number[])} AnyArray
@@ -42,12 +48,11 @@ export declare class Client {
     /**
      * @public
      * @param {string} Name - Database name
-     * @param {boolean} [Force=false] - Change force
-     * @param {boolean} [NotLoad=false] - Do not preload pointers and containers
+     * @param {BSON.DeserializeOptions} [deserializeOptions=] - Deserialize Options
      * @description Set database
      * @returns {this}
      */
-    SetDatabase(Name: string, Force?: boolean | false, NotLoad?: boolean | false): this;
+    SetDatabase(Name: string, deserializeOptions?: BSON.DeserializeOptions): this;
     /**
      * @public
      * @async
@@ -66,10 +71,11 @@ export declare class Client {
     /**
      * @public
      * @param {string} Container - Container ID
+     * @param {BSON.DeserializeOptions} [deserializeOptions=] - Deserialize Options
      * @description Get Container
      * @returns {BSON.Document}
      */
-    GetContainer(Container: string): BSON.Document | undefined;
+    GetContainer(Container: string, deserializeOptions?: BSON.DeserializeOptions): BSON.Document | undefined;
     /**
      * @public
      * @async
@@ -104,13 +110,29 @@ export declare class Client {
     Edit<T extends TypeResolvable>(Reference: string | number, KeyName: number | string | null, KeyValue: T, Value: T, TableId?: number, Container?: string): Promise<void>;
     /**
      * @public
+     * @param {(string|number)} Reference - Reference to find the pointer easier
+     * @param {PredicateType<T>} predicate - Predicate to find data
+     * @param {string} [Container=false] - Container ID
+     * @returns {(ContainerTable | undefined)}
+     */
+    FindByPredicate(Reference: string | number, predicate: PredicateType<ContainerTable>, Container?: string): ContainerTable | undefined;
+    /**
+     * @public
+     * @param {(string|number)} Reference - Reference to find the pointer easier
+     * @param {PredicateType<T>} predicate - Predicate to filter data
+     * @param {string} [Container=false] - Container ID
+     * @returns {(ContainerTable[] | undefined)}
+     */
+    Filter(Reference: string | number, predicate: PredicateType<ContainerTable>, Container?: string): ContainerTable[] | undefined;
+    /**
+     * @public
      * @async
      * @param {(string|number)} Reference - Reference to find the pointer easier
      * @param {(string | number | null)} KeyName - Key name to search the container
      * @param {Push} KeyValue - Key value to search the container
      * @param {string} [Container=false] - Container ID
      * @description Search table by a key
-     * @returns {Promise<ContainerTable | undefined>}
+     * @returns {(ContainerTable | undefined)}
      */
     Find<T extends TypeResolvable>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): ContainerTable | undefined;
     /**
@@ -120,7 +142,7 @@ export declare class Client {
      * * @param {number} TableId - TableId ID
      * @param {string} [Container=false] - Container ID
      * @description Get table by a table id
-     * @returns {Promise<ContainerTable | undefined>}
+     * @returns {(ContainerTable | undefined)}
      */
     Get(Reference: string | number, TableId: number, Container?: string): ContainerTable | undefined;
     /**

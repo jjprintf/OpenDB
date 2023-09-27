@@ -1,6 +1,7 @@
 export type ErrorClient = string | number | object | undefined;
 export type ClientOptions = {
     Path?: string;
+    Buffer?: number;
 };
 export type Pointer = {
     ID: string;
@@ -17,3 +18,4 @@ export type ContainerTable = {
     ID: number;
     Content: TypeResolvable;
 };
+export type PredicateType<T> = (value?: T, index?: number, array?: T[]) => unknown;

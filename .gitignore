@@ -5,9 +5,5 @@ node_modules/
 OpenDB/
 dist/
 
-# Files
-git.sh
-jsdoc.sh
-
 # Extensions
 *.log

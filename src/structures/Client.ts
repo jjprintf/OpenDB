@@ -5,13 +5,13 @@
 /* eslint-disable key-spacing */
 import fs from 'node:fs';
 
-import BSON from 'bson';
+import { BSON } from 'bson';
 
 import { uid } from 'uid';
 
 import { Emitter } from './NodeEmitter';
 
-import { ClientOptions, Pointer, TypeResolvable, Container, ContainerTable } from '../types';
+import { ClientOptions, Pointer, TypeResolvable, Container, ContainerTable, PredicateType } from '../types';
 
 import parsePath from '../helpers/parsePath';
 
@@ -28,7 +28,7 @@ export interface Client
 	Pointers: Map<string, Pointer>;
 
 	Containers: Map<string, Container>;
-	
+
 	Path: string[];
 }
 
@@ -37,6 +37,13 @@ export class Client
 	/**
 	 * @typedef {Object} ClientOptions
 	 * @property {string=} Path
+	 */
+
+	/**
+	 * @typedef {function} PredicateType<T>
+	 * @param {T} [value=]
+	 * @param {number} [index=]
+	 * @param {T[]} [array=]
 	 */
 	
 	/**
@@ -65,12 +72,15 @@ export class Client
 			this.Options.Path = path.join(...parsePath(this.Options.Path));
 		}
 
+		if (typeof this.Options.Buffer === "undefined")
+			this.Options.Buffer = 512;
+
 		this.Database = "none";
 
 		this.Pointers = new Map();
 		this.Containers = new Map();
 
-		BSON.setInternalBufferSize(500);
+		BSON.setInternalBufferSize(this.Options.Buffer);
 
 		Emitter.emit("start");
 	}
@@ -172,12 +182,11 @@ export class Client
 	/**
 	 * @public
 	 * @param {string} Name - Database name
-	 * @param {boolean} [Force=false] - Change force
-	 * @param {boolean} [NotLoad=false] - Do not preload pointers and containers
+	 * @param {BSON.DeserializeOptions} [deserializeOptions=] - Deserialize Options
 	 * @description Set database
 	 * @returns {this}
 	 */
-	public SetDatabase(Name: string, Force?: boolean | false, NotLoad?: boolean | false): this
+	public SetDatabase(Name: string, deserializeOptions?: BSON.DeserializeOptions): this
 	{
 		if (typeof this.Options.Path === "string")
 		{
@@ -199,61 +208,52 @@ export class Client
 
 		if (this.Database === "none")
 			this.Database = Name;
-		else
-		{
-			if (!Force)
-				throw new Error("(ODB-04) If force is not activated, the name of the database cannot be changed.");
-			else
-				this.Database = Name;
+		else {
+			this.Database = Name;
 		}
 
-		if (!NotLoad)
-		{
-			for (const file of fs.readdirSync(path.join(this.Options.Path, 'OpenDB', Name, 'Pointers'), { recursive: true }))
-			{
-				const pointerFile = fs.readFileSync(path.join(this.Options.Path, 'OpenDB', Name, 'Pointers', file as string));
-				const pointer = BSON.deserialize(pointerFile);
-
-				const pointerDoc: Pointer = {
-					ID: pointer.ID,
-					Reference: pointer.Reference,
-					Containers: pointer.Containers
-				};
-
-				this.Pointers.set(pointer.ID, pointerDoc);
+		if (!deserializeOptions) 
+			deserializeOptions = { allowObjectSmallerThanBufferSize: true };
+		else {
+			if (!Object.keys(deserializeOptions).includes("allowObjectSmallerThanBufferSize") || deserializeOptions.allowObjectSmallerThanBufferSize === false) {
+				deserializeOptions.allowObjectSmallerThanBufferSize = true;
 			}
+		}
 
-			for (const file of fs.readdirSync(path.join(this.Options.Path, 'OpenDB', Name, 'Containers'), { recursive: true }))
-			{
-				const containerFile = fs.readFileSync(path.join(this.Options.Path, 'OpenDB', Name, 'Containers', file as string));
+		for (const file of fs.readdirSync(path.join(this.Options.Path, 'OpenDB', Name, 'Pointers'), { recursive: true }))
+		{
+			const pointerFile = fs.readFileSync(path.join(this.Options.Path, 'OpenDB', Name, 'Pointers', file as string));
+			const pointer = BSON.deserialize(pointerFile);
 
-				let ContainerDocument: any[] = [];
+			const pointerDoc: Pointer = {
+				ID: pointer.ID,
+				Reference: pointer.Reference,
+				Containers: pointer.Containers
+			};
+
+			this.Pointers.clear();
+			this.Pointers.set(pointer.ID, pointerDoc);
+		}
+
+		for (const file of fs.readdirSync(path.join(this.Options.Path, 'OpenDB', Name, 'Containers'), { recursive: true }))
+		{
+			const _file = fs.readFileSync(path.join(this.Options.Path, 'OpenDB', Name, 'Containers', file as string));
+
+			let Document: Container[] = [];
+
+			BSON.deserializeStream(_file, 0, 1, Document, 0, deserializeOptions);
 				
-				if (BSON.calculateObjectSize(containerFile) >= 5) 
-				{
-					const container = BSON.deserializeStream(containerFile, 0, 1, ContainerDocument, 0, { allowObjectSmallerThanBufferSize: true });
-					
-					const containerDoc: Container = {
-						ID: ContainerDocument[0].ID,
-						Tables: ContainerDocument[0].Tables
-					};
+			Document.forEach((container) => {
+				if (!container.ID || !container.Tables) return;
 
-					this.Containers.set(ContainerDocument[0].ID, containerDoc);
-				} else
-				{
-					const container = BSON.deserialize(containerFile);
-					
-					const containerDoc: Container = 
-					{
-						ID: container.ID,
-						Tables: container.Tables
-					}
-					this.Containers.set(container.ID, containerDoc);
+				const _container: Container = {
+					ID: container.ID,
+					Tables: container.Tables
 				}
-			}
-		} else
-		{
-			console.log("(Warn-03) This can cause loading times to increase significantly.");
+
+				this.Containers.clear();
+				this.Containers.set(container.ID, _container);
+			});
 		}
 		
 		return this;
@@ -352,10 +352,11 @@ export class Client
 	/**
 	 * @public
 	 * @param {string} Container - Container ID
+	 * @param {BSON.DeserializeOptions} [deserializeOptions=] - Deserialize Options
 	 * @description Get Container
 	 * @returns {BSON.Document}
 	 */
-	public GetContainer(Container: string): BSON.Document | undefined
+	public GetContainer(Container: string, deserializeOptions?: BSON.DeserializeOptions): BSON.Document | undefined
 	{
 		this.CheckFolders();
 		
@@ -366,15 +367,26 @@ export class Client
 		{
 			let _container = undefined;
 
+			if (!deserializeOptions) 
+				deserializeOptions = { allowObjectSmallerThanBufferSize: true };
+			else {
+				if (!Object.keys(deserializeOptions).includes("allowObjectSmallerThanBufferSize") || deserializeOptions.allowObjectSmallerThanBufferSize === false) {
+					deserializeOptions.allowObjectSmallerThanBufferSize = true;
+				}
+			}
+
 			for (const file of fs.readdirSync(path.join(this.Options.Path, 'OpenDB', this.Database, 'Containers')))
 			{
-				const pointerFile = fs.readFileSync(path.join(this.Options.Path, 'OpenDB', this.Database, 'Containers', file as string));
-				const x = BSON.deserialize(pointerFile);
+				const _file = fs.readFileSync(path.join(this.Options.Path, 'OpenDB', this.Database, 'Containers', file as string));
+				let Document: Container[] = [];
 
-				if (x.ID === Container)
-				{
-					_container = x;
-				}
+				BSON.deserializeStream(_file, 0, 1, Document, 0, deserializeOptions);
+				
+				Document.forEach((container) => {
+					if (!container.ID || !container.Tables) return;
+
+					if(container.ID === Container) _container = container;
+				});
 			}
 
 			return _container;
@@ -403,28 +415,14 @@ export class Client
 		if (typeof this.Options.Path === "undefined")
 			throw new Error("An error occurred and the path was not specified.");
 		
-		const pointer = this.GetPointer(Reference);
+		const pointer = this.GetPointer(Reference) as Pointer;
 
 		if (pointer === undefined)
 			throw new Error("(ODB-05) Pointer not found.");
 
 		if (!Container)
 		{
-			let container = undefined;
-
-			if (!this.Containers.get(pointer.Containers[0]))
-			{
-				for (const file of fs.readdirSync(path.join(this.Options.Path, 'OpenDB', this.Database, 'Containers')))
-				{
-					const pointerFile = fs.readFileSync(path.join(this.Options.Path, 'OpenDB', this.Database, 'Containers', file as string));
-					const x = BSON.deserialize(pointerFile);
-
-					if (x.ID === pointer.Containers[0])
-					{
-						container = x;
-					}
-				}
-			} else container = this.Containers.get(pointer.Containers[0])
+			let container = this.GetContainer(pointer.Containers[0]);
 
 			if (!container)
 				throw new Error("(ODB-06) Container not found");
@@ -454,12 +452,12 @@ export class Client
 				container.Tables.push(content);
 			}
 
-			container = {
+			const _container = {
 				ID: container.ID,
 				Tables: container.Tables
 			};
 
-			this.Containers.set(container.ID, container);
+			this.Containers.set(container.ID, _container);
 
 			await fs.promises.writeFile(path.join(this.Options.Path, 'OpenDB', this.Database, 'Containers', container.ID+'.bson'), BSON.serialize(container))
 				.catch((error) =>
@@ -469,21 +467,7 @@ export class Client
 		}
 		else
 		{
-			let container = undefined;
-
-			if (!this.Containers.get(Container))
-			{
-				for (const file of fs.readdirSync(path.join(this.Options.Path, 'OpenDB', this.Database, 'Containers')))
-				{
-					const pointerFile = fs.readFileSync(path.join(this.Options.Path, 'OpenDB', this.Database, 'Containers', file as string));
-					const x = BSON.deserialize(pointerFile);
-
-					if (x.ID === Container)
-					{
-						container = x;
-					}
-				}
-			} else container = this.Containers.get(Container);
+			let container = this.GetContainer(Container);
 
 			if (!container)
 				throw new Error("(ODB-06) Container not found");
@@ -513,12 +497,12 @@ export class Client
 				container.Tables.push(content);
 			}
 
-			container = {
+			const _container = {
 				ID: container.ID,
 				Tables: container.Tables
 			};
 
-			this.Containers.set(container.ID, container);
+			this.Containers.set(container.ID, _container);
 
 			await fs.promises.writeFile(path.join(this.Options.Path, 'OpenDB', this.Database, 'Containers', container.ID+'.bson'), BSON.serialize(container))
 				.catch((error) =>
@@ -622,7 +606,7 @@ export class Client
 			if (Container.length !== 18)
 				throw new Error("(ODB-09) This ID is not correct");
 			
-			const _container = this.Containers.get(Container);
+			const _container = this.GetContainer(Container);
 			let found = false;
 	
 			if (!_container)
@@ -695,7 +679,7 @@ export class Client
 				if (typeof this.Options.Path === "undefined")
 					throw new Error("An error occurred and the path was not specified.");
 				
-				const _container = this.Containers.get(x);
+				const _container = this.GetContainer(x);
 				let found = false;
 	
 				if (!_container)
@@ -764,6 +748,66 @@ export class Client
 			});
 		}		
 	}
+
+	/**
+	 * @public
+	 * @param {(string|number)} Reference - Reference to find the pointer easier
+	 * @param {PredicateType<T>} predicate - Predicate to find data
+	 * @param {string} [Container=false] - Container ID
+	 * @returns {(ContainerTable | undefined)}
+	 */
+	public FindByPredicate(Reference: string | number, predicate: PredicateType<ContainerTable>, Container?: string): ContainerTable | undefined {
+		const pointer = this.GetPointer(Reference) as Pointer;
+
+		if (!pointer)
+			throw new Error("(ODB-05) Pointer not found");
+
+		if (!Container) {
+			const container = this.GetContainer(pointer.Containers[0]) as Container;
+
+			if (!container) 
+				throw new Error("(ODB-06) Container not found");
+
+			return container.Tables.find(predicate);
+		} else {
+			const container = this.GetContainer(Container) as Container;
+
+			if (!container) 
+				throw new Error("(ODB-06) Container not found");
+
+			return container.Tables.find(predicate);
+		}
+	}
+
+	/**
+	 * @public
+	 * @param {(string|number)} Reference - Reference to find the pointer easier
+	 * @param {PredicateType<T>} predicate - Predicate to filter data
+	 * @param {string} [Container=false] - Container ID
+	 * @returns {(ContainerTable[] | undefined)}
+	 */
+	public Filter(Reference: string | number, predicate: PredicateType<ContainerTable>, Container?: string): ContainerTable[] | undefined {
+		const pointer = this.GetPointer(Reference) as Pointer;
+
+		if (!pointer)
+			throw new Error("(ODB-05) Pointer not found");
+
+		if (!Container) {
+			const container = this.GetContainer(pointer.Containers[0]) as Container;
+
+			if (!container) 
+				throw new Error("(ODB-06) Container not found");
+
+			return container.Tables.filter(predicate);
+		} else {
+			const container = this.GetContainer(Container) as Container;
+
+			if (!container) 
+				throw new Error("(ODB-06) Container not found");
+
+			return container.Tables.filter(predicate);
+		}
+	}
 	
 	/**
 	 * @public
@@ -773,7 +817,7 @@ export class Client
 	 * @param {Push} KeyValue - Key value to search the container
 	 * @param {string} [Container=false] - Container ID
 	 * @description Search table by a key
-	 * @returns {Promise<ContainerTable | undefined>}
+	 * @returns {(ContainerTable | undefined)}
 	 */
 	public Find<T extends TypeResolvable>(Reference: string | number, KeyName: string | number | null, KeyValue: T, Container?: string): ContainerTable | undefined
 	{
@@ -792,7 +836,7 @@ export class Client
 			if (Container.length !== 18)
 				throw new Error("(ODB-09) This ID is not correct");
 			
-			const _container = this.Containers.get(Container);
+			const _container = this.GetContainer(Container);
 			let found = false;
 			let table: ContainerTable | undefined;
 	
@@ -829,7 +873,7 @@ export class Client
 			let table: ContainerTable | undefined;
 			
 			_pointer.Containers.forEach(async (x: any) => {
-				const _container = this.Containers.get(x);
+				const _container = this.GetContainer(x);
 				let found = false;
 	
 				if (!_container)
@@ -870,7 +914,7 @@ export class Client
 	 * * @param {number} TableId - TableId ID
 	 * @param {string} [Container=false] - Container ID
 	 * @description Get table by a table id
-	 * @returns {Promise<ContainerTable | undefined>}
+	 * @returns {(ContainerTable | undefined)}
 	 */
 	public Get(Reference: string | number, TableId: number, Container?: string): ContainerTable | undefined
 	{
@@ -889,7 +933,7 @@ export class Client
 			if (Container.length !== 18)
 				throw new Error("(ODB-09) This ID is not correct");
 			
-			const _container = this.Containers.get(Container);
+			const _container = this.GetContainer(Container);
 			let found = false;
 			let table: ContainerTable | undefined;
 	
@@ -915,7 +959,7 @@ export class Client
 			let table: ContainerTable | undefined;
 			
 			_pointer.Containers.forEach(async (x: any) => {
-				const _container = this.Containers.get(x);
+				const _container = this.GetContainer(x);
 				let found = false;
 	
 				if (!_container)

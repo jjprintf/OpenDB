@@ -1,19 +1,24 @@
-# @OpenDB
+# @OpenDB ~ Best local non-relational database
 
 > Documentation: [OpenDB Docs](https://printfdead.github.io/opendb/index.html)
+
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
 
 ![Typescript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Node](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![NPM](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)
+![Yarn](https://img.shields.io/badge/yarn-2D8EB9?style=for-the-badge&logo=yarn&logoColor=white)
 
 ## Information:
 - :wrench: Efficient and fast database using BSON.
 - :butterfly: Simple and easy to use
 - :smile: Version 1.3
+- :globe_with_meridians: More than 10,000 tables per container, using a Buffer of 10240 bytes!
 
 ### :wrench: Installation
 ```sh
 npm i @printfdead/open.db --save
+yarn add @printfdead/open.db
 ```
 
 ## Why use OpenDB
@@ -27,7 +32,8 @@ npm i @printfdead/open.db --save
 
 ### :zap: Flexibility & Scalability
 > This database is flexible. 
-> But it is not scalable since it is designed for fast, small/medium environments and where not much data needs to be saved since it is not scalable (Example: discord bots, web pages where not much data needs to be saved, bots in other applications, other environments that have these characteristics)
+> Although in theory OpenDB is scalable since it can support more than 10 thousand tables per container and save more than 1 thousand tables per second, it can also deserialize a container with more than 10 thousand tables in 100 ms, we do not consider it scalable since As the container becomes larger, it takes longer to save a table, increasing the buffer can balance and solve this problem. 
+> Currently OpenDB can be used in any environment, as long as it is required locally.
 
 ### :package: Cache
 > It saves the data in a `Map` which makes it easier to search and use the database, making it much faster, making the time it takes to execute a method no more than **10ms**
@@ -44,10 +50,10 @@ import { Client, Emitter } from '@printfdead/open.db';
 
 /**
  * @param {object} options - Put database name and path
- * @new Client({ Path: string });
+ * @new Client({ Path?: string, Buffer?: number });
  * @description Instance new Client for create new database or use a database.
  */
-const OpenDB = new Client({ Path: "path/to/root/folder" });
+const OpenDB = new Client({ Path: "path/to/root/folder", Buffer: 512 });
 
 /** 
  * @param {string} event - Event name
@@ -72,6 +78,7 @@ Emitter.on('error', (error) => {
 ```
 #### Note:
 - **Path:** must not start with dot (".", except two dots, EJ: "..") or slashes (/, \) or end in slash
+- **Buffer:** custom buffer size, this has to be set depending on how large the bson container is and the amount of bson data you manage in the database, by default it is 512, but you can edit it depending on your needs.
 ---
 > `Start`
 ```ts
@@ -204,6 +211,33 @@ OpenDB.Find<string>("Pointer Reference", null, "Test1", "Container ID") as Conta
 ```
 #### Note:
 - **KeyName:** If your KeyName is not an object just put null.
+---
+> `FindByPredicate`
+```ts
+/**
+ * @param {(string|number)} Reference - Reference to find the pointer easier
+ * @param {PredicateType<T>} predicate - Predicate to find data
+ * @param {string} [Container=false] - Container ID
+ * @returns ContainerTable | undefined
+ */
+import { ContainerTable } from '@printfdead/open.db'
+
+OpenDB.FindByPredicate("Pointer Reference", (value: ContainerTable, index: number) => value.Content === "Hello World!", "Container ID") as ContainerTable;
+```
+---
+> `Filter`
+```ts
+/**
+ * @public
+ * @param {(string|number)} Reference - Reference to find the pointer easier
+ * @param {PredicateType<T>} predicate - Predicate to filter data
+ * @param {string} [Container=false] - Container ID
+ * @returns {(ContainerTable[] | undefined)}
+ */
+import { ContainerTable } from '@printfdead/open.db'
+
+OpenDB.Filter("Pointer Reference", (value: ContainerTable, index: number) => value.Content === "Hello World!", "Container ID") as ContainerTable[];
+```
 ---
 > `Get`
 ```ts

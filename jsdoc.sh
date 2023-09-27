@@ -1,1 +1,0 @@
-jsdoc -c jsdoc.json
